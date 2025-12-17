@@ -1,0 +1,43 @@
+IF EXISTS (SELECT 1 FROM app.SchemaMigrations WHERE MigrationId = '0003_orders')
+    THROW 50000, 'Migration already applied', 1;
+
+BEGIN TRAN;
+
+CREATE TABLE app.Orders (
+    OrderId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    TenantId UNIQUEIDENTIFIER NOT NULL,
+    CustomerId UNIQUEIDENTIFIER NOT NULL,
+    TotalAmount DECIMAL(10,2) NOT NULL,
+    Status NVARCHAR(50) NOT NULL,
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (TenantId) REFERENCES app.Tenants(TenantId),
+    FOREIGN KEY (CustomerId) REFERENCES app.Customers(CustomerId)
+);
+
+CREATE TABLE app.OrderItems (
+    OrderItemId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    OrderId UNIQUEIDENTIFIER NOT NULL,
+    ProductId UNIQUEIDENTIFIER NOT NULL,
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (OrderId) REFERENCES app.Orders(OrderId),
+    FOREIGN KEY (ProductId) REFERENCES app.Products(ProductId)
+);
+
+CREATE TABLE app.Payments (
+    PaymentId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    OrderId UNIQUEIDENTIFIER NOT NULL,
+    TenantId UNIQUEIDENTIFIER NOT NULL,
+    StripePaymentIntentId NVARCHAR(100),
+    Amount DECIMAL(10,2),
+    Status NVARCHAR(50),
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (OrderId) REFERENCES app.Orders(OrderId)
+);
+
+INSERT INTO app.SchemaMigrations VALUES
+('0003_orders', SYSDATETIME(), SUSER_SNAME(), 'Orders and payments');
+
+COMMIT;

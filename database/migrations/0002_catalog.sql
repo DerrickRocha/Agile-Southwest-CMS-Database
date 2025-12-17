@@ -1,0 +1,51 @@
+IF EXISTS (SELECT 1 FROM app.SchemaMigrations WHERE MigrationId = '0002_catalog')
+    THROW 50000, 'Migration already applied', 1;
+
+BEGIN TRAN;
+
+CREATE TABLE app.Products (
+    ProductId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    TenantId UNIQUEIDENTIFIER NOT NULL,
+    Name NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(MAX),
+    Price DECIMAL(10,2) NOT NULL,
+    IsActive BIT DEFAULT 1,
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (TenantId) REFERENCES app.Tenants(TenantId)
+);
+
+CREATE TABLE app.ProductOptions (
+    ProductOptionId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ProductId UNIQUEIDENTIFIER NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (ProductId) REFERENCES app.Products(ProductId)
+);
+
+CREATE TABLE app.Choices (
+    ChoiceId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ProductOptionId UNIQUEIDENTIFIER NOT NULL,
+    Name NVARCHAR(100) NOT NULL,
+    Price DECIMAL(10,2),
+    SalePrice DECIMAL(10,2),
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (ProductOptionId) REFERENCES app.ProductOptions(ProductOptionId)
+);
+
+CREATE TABLE app.ProductImages (
+    ImageId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ProductId UNIQUEIDENTIFIER NOT NULL,
+    ImageUrl NVARCHAR(500) NOT NULL,
+    SortOrder INT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    FOREIGN KEY (ProductId) REFERENCES app.Products(ProductId)
+);
+
+INSERT INTO app.SchemaMigrations VALUES
+('0002_catalog', SYSDATETIME(), SUSER_SNAME(), 'Products, options, images');
+
+COMMIT;
