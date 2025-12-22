@@ -1,9 +1,11 @@
 ﻿/* ============================================================
-   Migration: 009_add_stores_and_store_scoping
+   Migration: 0008_add_stores_and_store_scoping
    Purpose  : Introduce Stores and scope Products, Inventory,
               Orders to a Store while preserving existing data
    Author   : Your Name
    ============================================================ */
+   IF EXISTS (SELECT 1 FROM app.SchemaMigrations WHERE MigrationId = '008_add_stores_and_store_scoping')
+    THROW 50000, 'Migration already applied', 1;
 
 BEGIN TRY
     BEGIN TRANSACTION;
@@ -140,8 +142,14 @@ BEGIN TRY
     /* ============================================================
        7️⃣ Record migration as applied
        ============================================================ */
-    INSERT INTO app.SchemaMigrations (MigrationName)
-    VALUES ('009_add_stores_and_store_scoping');
+  
+
+    INSERT INTO app.SchemaMigrations VALUES (
+        '008_add_stores_and_store_scoping',
+        SYSDATETIME(),
+        SUSER_SNAME(),
+        'Stores and store scoping'
+    );
 
     COMMIT TRANSACTION;
 END TRY
