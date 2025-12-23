@@ -2,7 +2,7 @@
    Migration: 0008_add_stores_and_store_scoping
    Purpose  : Introduce Stores and scope Products, Inventory,
               Orders to a Store while preserving existing data
-   Author   : Your Name
+   Author   : Derrick Rocha
    ============================================================ */
    IF EXISTS (SELECT 1 FROM app.SchemaMigrations WHERE MigrationId = '008_add_stores_and_store_scoping')
     THROW 50000, 'Migration already applied', 1;
