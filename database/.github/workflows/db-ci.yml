@@ -1,0 +1,39 @@
+name: Database CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  db-ci:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: YourStrong!Passw0rd
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="pgrep sqlservr"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install sqlcmd
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mssql-tools unixodbc-dev
+
+      - name: Wait for SQL Server
+        run: sleep 15
+
+      - name: Apply migrations
+        run: ./apply-migrations.sh
