@@ -36,4 +36,4 @@ jobs:
         run: sleep 15
 
       - name: Apply migrations
-        run: ./apply-migrations.sh
+        run: ./apply-migrations-ci.sh
