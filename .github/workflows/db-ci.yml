@@ -36,7 +36,7 @@ jobs:
           source ~/.bashrc
 
       - name: Make migration script executable
-        run: chmod +x ./database/apply-migrations.sh
+        run: chmod +x ./database/apply-migrations-ci.sh
 
       - name: Wait for SQL Server
         run: sleep 20
