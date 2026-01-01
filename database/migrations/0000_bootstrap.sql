@@ -1,6 +1,11 @@
 SET XACT_ABORT ON;
 BEGIN TRAN;
 
+IF NOT EXISTS(SELECT 1 FROM sys.schemas WHERE name = 'app')
+BEGIN 
+    CREATE SCHEMA app;
+END 
+
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SchemaMigrations')
 BEGIN
     CREATE TABLE app.SchemaMigrations (
