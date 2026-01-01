@@ -13,6 +13,7 @@ DB_NAME="AppDb"
 
 # Create database if not exists
 /opt/mssql-tools/bin/sqlcmd \
+  -b \
   -S "$DB_HOST" \
   -U "$DB_USER" \
   -P "$DB_PASSWORD" \
@@ -23,6 +24,7 @@ echo "Applying migrations..."
 for file in "$MIGRATIONS_DIR"/*.sql; do
   echo "Running $(basename "$file")"
   /opt/mssql-tools/bin/sqlcmd \
+    -b \
     -S "$DB_HOST" \
     -U "$DB_USER" \
     -P "$DB_PASSWORD" \
