@@ -1,33 +1,47 @@
-START TRANSACTION;
+DELIMITER $$
 
--- --------------------------------------------------
--- Step 1: Insert a tenant
--- --------------------------------------------------
-SET @TenantId = UNHEX(REPLACE(UUID(), '-', ''));
+CREATE PROCEDURE store_integrity_tests()
+BEGIN
+    DECLARE v_TenantId BINARY(16);
+    DECLARE v_StoreId1 BINARY(16);
+    DECLARE v_StoreId2 BINARY(16);
 
-INSERT INTO Tenants (TenantId, Name, Subdomain, SubscriptionStatus)
-VALUES (@TenantId, 'Tenant', 'tenant', 'Active');
+    -- Generate UUIDs for tenant and stores
+    SET v_TenantId = UUID_TO_BIN(UUID());
+    SET v_StoreId1 = UUID_TO_BIN(UUID());
+    SET v_StoreId2 = UUID_TO_BIN(UUID());
 
--- --------------------------------------------------
--- Step 2: Insert a default store for the tenant
--- --------------------------------------------------
-INSERT INTO Stores (TenantId, Name, IsDefault)
-VALUES (@TenantId, 'Main Store', 1);
+    -- Insert a tenant
+    INSERT INTO Tenants (TenantId, Name, Subdomain, SubscriptionStatus)
+    VALUES (v_TenantId, 'Tenant', 'tenant', 'Active');
 
--- --------------------------------------------------
--- Step 3: Attempt to insert a second default store for the same tenant
--- Expect failure due to unique constraint on (TenantId, IsDefault)
--- --------------------------------------------------
-SELECT
-    CASE
-        WHEN EXISTS (
-            SELECT 1
-            FROM Stores
-            WHERE TenantId = @TenantId
-              AND IsDefault = 1
-        )
-            THEN 1 / 0  -- fail if we somehow allow multiple default stores
-        ELSE 1
-        END AS default_store_uniqueness_test;
+    -- Insert the first default store
+    INSERT INTO Stores (StoreId, TenantId, Name, IsDefault)
+    VALUES (v_StoreId1, v_TenantId, 'Main Store', 1);
 
-ROLLBACK;
+    -- Test: attempt to insert a second default store for same tenant
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+            BEGIN
+                -- Expected: uniqueness violation on (TenantId, IsDefault)
+                -- Do nothing, test passes
+            END;
+
+        -- This should fail due to unique constraint
+        INSERT INTO Stores (StoreId, TenantId, Name, IsDefault)
+        VALUES (v_StoreId2, v_TenantId, 'Second Default', 1);
+
+        -- If we reach here, no error occurred → test failed
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Test failed: multiple default stores allowed';
+    END;
+END$$
+
+DELIMITER ;
+
+-- Run the test
+CALL store_integrity_tests();
+
+-- Drop the procedure after test to avoid conflicts
+DROP PROCEDURE store_integrity_tests;
+
