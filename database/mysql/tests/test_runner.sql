@@ -1,1 +1,0 @@
-CALL schema_contract_tests();
