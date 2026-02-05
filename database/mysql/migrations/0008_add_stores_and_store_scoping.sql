@@ -6,6 +6,20 @@
 START TRANSACTION;
 
 -- ------------------------------------------------------------
+-- 1️⃣ Create Stores table if not exists
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS Stores (
+                                      StoreId     BINARY(16) PRIMARY KEY,
+                                      TenantId    BINARY(16) NOT NULL,
+                                      Name        VARCHAR(200) NOT NULL,
+                                      IsDefault   TINYINT(1) NOT NULL DEFAULT 0,
+                                      CreatedAt   DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+                                      UpdatedAt   DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+                                      CONSTRAINT fk_stores_tenant FOREIGN KEY (TenantId) REFERENCES Tenants(TenantId),
+                                      UNIQUE KEY uq_stores_tenant_default (TenantId, IsDefault)
+);
+
+-- ------------------------------------------------------------
 -- Add StoreId column to Products
 -- ------------------------------------------------------------
 SET @sql := (
