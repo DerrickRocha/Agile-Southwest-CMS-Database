@@ -37,10 +37,20 @@ if [[ "$CONFIRM" != "APPLY" ]]; then
   exit 1
 fi
 
-echo
-echo "🔍 Checking applied migrations..."
+MIGRATIONS_DIR="$(cd "$(dirname "$0")"/migrations && pwd)"
 
-# Fetch applied migration IDs
+echo
+echo "▶ Running bootstrap migration"
+
+mysql \
+  -h "$DB_SERVER" \
+  -u "$DB_USER" \
+  -p"$DB_PASSWORD" \
+  "$DB_NAME" < "$MIGRATIONS_DIR/0000_bootstrap.sql"
+
+echo
+echo "🔍 Fetching applied migrations..."
+
 APPLIED=$(mysql \
   -h "$DB_SERVER" \
   -u "$DB_USER" \
@@ -49,8 +59,13 @@ APPLIED=$(mysql \
   "$DB_NAME" \
   -e "SELECT MigrationId FROM SchemaMigrations;")
 
-for file in migrations/*.sql; do
-  MIGRATION_ID=$(basename "$file" .sql)
+for file in "$MIGRATIONS_DIR"/*.sql; do
+  MIGRATION_ID="$(basename "$file" .sql)"
+
+  # Skip bootstrap (already handled)
+  if [[ "$MIGRATION_ID" == "0000_bootstrap" ]]; then
+    continue
+  fi
 
   if echo "$APPLIED" | grep -qx "$MIGRATION_ID"; then
     echo "⏭️  Skipping $MIGRATION_ID (already applied)"
@@ -64,13 +79,6 @@ for file in migrations/*.sql; do
     -u "$DB_USER" \
     -p"$DB_PASSWORD" \
     "$DB_NAME" < "$file"
-
-  mysql \
-    -h "$DB_SERVER" \
-    -u "$DB_USER" \
-    -p"$DB_PASSWORD" \
-    "$DB_NAME" \
-    -e "INSERT INTO SchemaMigrations (MigrationId) VALUES ('$MIGRATION_ID');"
 
   echo "✔ Applied $MIGRATION_ID"
 done

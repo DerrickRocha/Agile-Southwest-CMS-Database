@@ -11,7 +11,12 @@ CREATE TABLE IF NOT EXISTS SchemaMigrations (
                                                 Description VARCHAR(500)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO SchemaMigrations
+INSERT INTO SchemaMigrations (
+    MigrationId,
+    AppliedAt,
+    AppliedBy,
+    Description
+)
 SELECT
     '0000_bootstrap',
     CURRENT_TIMESTAMP(6),
