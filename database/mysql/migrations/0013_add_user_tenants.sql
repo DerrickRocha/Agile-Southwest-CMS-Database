@@ -52,8 +52,7 @@ WHERE TenantId IS NOT NULL;
 
 -- Replace FK_CmsUsers_Tenant with your actual FK name
 ALTER TABLE CmsUsers
-    DROP FOREIGN KEY FK_CmsUsers_Tenant;
-
+    DROP FOREIGN KEY FK_CmsUsers_Tenants;
 
 -- =====================================================
 -- 4️⃣ Drop TenantId Column From CmsUsers
