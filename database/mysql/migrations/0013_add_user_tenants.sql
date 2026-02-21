@@ -39,6 +39,30 @@ SELECT CmsUserId, TenantId, 'Member', CreatedAt
 FROM CmsUsers
 WHERE TenantId IS NOT NULL;
 
+-- =====================================================
+-- 3️⃣ Drop Foreign Key From CmsUsers
+-- =====================================================
 
+-- First find the actual FK name if unknown:
+-- SELECT CONSTRAINT_NAME
+-- FROM information_schema.KEY_COLUMN_USAGE
+-- WHERE TABLE_NAME = 'CmsUsers'
+--   AND COLUMN_NAME = 'TenantId'
+--   AND REFERENCED_TABLE_NAME = 'Tenants';
+
+-- Replace FK_CmsUsers_Tenant with your actual FK name
+ALTER TABLE CmsUsers
+    DROP FOREIGN KEY FK_CmsUsers_Tenant;
+
+-- Drop index on TenantId if it exists
+ALTER TABLE CmsUsers
+    DROP INDEX TenantId;
+
+-- =====================================================
+-- 4️⃣ Drop TenantId Column From CmsUsers
+-- =====================================================
+
+ALTER TABLE CmsUsers
+    DROP COLUMN TenantId;
 
 COMMIT;
