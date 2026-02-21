@@ -54,6 +54,9 @@ WHERE TenantId IS NOT NULL;
 ALTER TABLE CmsUsers
     DROP FOREIGN KEY fk_cmsusers_tenant;
 
+ALTER TABLE CmsUsers
+    DROP FOREIGN KEY FK_CmsUsers_Tenants;
+
 -- =====================================================
 -- 4️⃣ Drop TenantId Column From CmsUsers
 -- =====================================================
