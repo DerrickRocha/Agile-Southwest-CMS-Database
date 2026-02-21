@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS UserTenants
             ON DELETE CASCADE,
 
     CONSTRAINT FK_User_Tenants_Tenant
-        FOREIGN KEY (TenantId) REFERENCES Tenant (TenantId)
+        FOREIGN KEY (TenantId) REFERENCES Tenants (TenantId)
             ON DELETE CASCADE
 
 ) ENGINE = InnoDB
