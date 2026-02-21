@@ -54,9 +54,6 @@ WHERE TenantId IS NOT NULL;
 ALTER TABLE CmsUsers
     DROP FOREIGN KEY FK_CmsUsers_Tenant;
 
--- Drop index on TenantId if it exists
-ALTER TABLE CmsUsers
-    DROP INDEX TenantId;
 
 -- =====================================================
 -- 4️⃣ Drop TenantId Column From CmsUsers
