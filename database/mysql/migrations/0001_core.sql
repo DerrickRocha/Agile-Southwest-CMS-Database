@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS cms_users
     email           VARCHAR(255) NOT NULL,
     role            VARCHAR(50)  NOT NULL,
     status          VARCHAR(50)  NOT NULL,
-    created_at       DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    created_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_cms_users_email (email)
 ) ENGINE = InnoDB
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS tenants
     custom_domain       VARCHAR(255),
     plan_tier           VARCHAR(50)  NOT NULL,
     subscription_status VARCHAR(50)  NOT NULL,
-    status VARCHAR(50)  NOT NULL,
+    status              VARCHAR(50)  NOT NULL,
     created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_tenants_subdomain (sub_domain)
@@ -61,10 +61,10 @@ CREATE TABLE IF NOT EXISTS user_tenants
 CREATE TABLE IF NOT EXISTS customers
 (
     id         Int PRIMARY KEY AUTO_INCREMENT,
-    user_id    Int NOT NULL,
-    email      VARCHAR(255)    NOT NULL,
-    created_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    user_id    Int          NOT NULL,
+    email      VARCHAR(255) NOT NULL,
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_customers_tenant_email (email),
     CONSTRAINT customer_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB
