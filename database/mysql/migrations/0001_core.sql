@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS user_tenants
 -- ----------------------------------------
 CREATE TABLE IF NOT EXISTS customers
 (
-    id         BINARY(16) PRIMARY KEY AUTO_INCREMENT,
+    id         Int PRIMARY KEY AUTO_INCREMENT,
     user_id    VARCHAR(100),
     email      VARCHAR(255) NOT NULL,
     created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
