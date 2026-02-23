@@ -228,91 +228,77 @@ SET @sql := (
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- Drop PKs (so MODIFY works cleanly)
-ALTER TABLE Tenants        DROP PRIMARY KEY;
-ALTER TABLE Stores         DROP PRIMARY KEY;
-ALTER TABLE CmsUsers       DROP PRIMARY KEY;
-ALTER TABLE Customers      DROP PRIMARY KEY;
-ALTER TABLE Products       DROP PRIMARY KEY;
-ALTER TABLE ProductOptions DROP PRIMARY KEY;
-ALTER TABLE Orders         DROP PRIMARY KEY;
-ALTER TABLE OrderItems     DROP PRIMARY KEY;
-ALTER TABLE Payments       DROP PRIMARY KEY;
-ALTER TABLE Inventory      DROP PRIMARY KEY;
-ALTER TABLE Subscriptions  DROP PRIMARY KEY;
-ALTER TABLE Invoices       DROP PRIMARY KEY;
-ALTER TABLE Pages          DROP PRIMARY KEY;
-ALTER TABLE UserTenants    DROP PRIMARY KEY;
+ALTER TABLE Tenants
+DROP PRIMARY KEY,
+        MODIFY TenantId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (TenantId);
 
--- -------------------------
--- Convert PKs to AUTO_INCREMENT
--- -------------------------
-ALTER TABLE Tenants        MODIFY TenantId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Stores         MODIFY StoreId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE CmsUsers       MODIFY CmsUserId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Customers      MODIFY CustomerId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Products       MODIFY ProductId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE ProductOptions MODIFY ProductOptionId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Orders         MODIFY OrderId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE OrderItems     MODIFY OrderItemId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Payments       MODIFY PaymentId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Inventory      MODIFY InventoryId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Subscriptions  MODIFY SubscriptionId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Invoices       MODIFY InvoiceId INT NOT NULL AUTO_INCREMENT;
-ALTER TABLE Pages          MODIFY PageId INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE Stores
+DROP PRIMARY KEY,
+        MODIFY StoreId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (StoreId);
 
--- -------------------------
--- Convert FK columns to INT
--- -------------------------
-ALTER TABLE Stores         MODIFY TenantId INT NOT NULL;
+ALTER TABLE CmsUsers
+DROP PRIMARY KEY,
+        MODIFY CmsUserId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (CmsUserId);
 
-ALTER TABLE Customers      MODIFY TenantId INT NOT NULL;
+ALTER TABLE Customers
+DROP PRIMARY KEY,
+        MODIFY CustomerId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (CustomerId);
 
-ALTER TABLE Products       MODIFY TenantId INT NOT NULL;
-ALTER TABLE Products       MODIFY StoreId INT NOT NULL;
+ALTER TABLE Products
+DROP PRIMARY KEY,
+        MODIFY ProductId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (ProductId);
 
-ALTER TABLE ProductOptions MODIFY ProductId INT NOT NULL;
+ALTER TABLE ProductOptions
+DROP PRIMARY KEY,
+        MODIFY ProductOptionId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (ProductOptionId);
 
-ALTER TABLE Orders         MODIFY TenantId INT NOT NULL;
-ALTER TABLE Orders         MODIFY CustomerId INT NOT NULL;
-ALTER TABLE Orders         MODIFY StoreId INT NOT NULL;
+ALTER TABLE Orders
+DROP PRIMARY KEY,
+        MODIFY OrderId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (OrderId);
 
-ALTER TABLE OrderItems     MODIFY OrderId INT NOT NULL;
-ALTER TABLE OrderItems     MODIFY ProductId INT NOT NULL;
+ALTER TABLE OrderItems
+DROP PRIMARY KEY,
+        MODIFY OrderItemId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (OrderItemId);
 
-ALTER TABLE Payments       MODIFY OrderId INT NOT NULL;
-ALTER TABLE Payments       MODIFY TenantId INT NOT NULL;
+ALTER TABLE Payments
+DROP PRIMARY KEY,
+        MODIFY PaymentId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (PaymentId);
 
-ALTER TABLE Inventory      MODIFY TenantId INT NOT NULL;
-ALTER TABLE Inventory      MODIFY ProductId INT NOT NULL;
-ALTER TABLE Inventory      MODIFY StoreId INT NOT NULL;
+ALTER TABLE Inventory
+DROP PRIMARY KEY,
+        MODIFY InventoryId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (InventoryId);
 
-ALTER TABLE Subscriptions  MODIFY TenantId INT NOT NULL;
-ALTER TABLE Invoices       MODIFY SubscriptionId INT NOT NULL;
+ALTER TABLE Subscriptions
+DROP PRIMARY KEY,
+        MODIFY SubscriptionId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (SubscriptionId);
 
-ALTER TABLE Pages          MODIFY TenantId INT NOT NULL;
+ALTER TABLE Invoices
+DROP PRIMARY KEY,
+        MODIFY InvoiceId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (InvoiceId);
 
-ALTER TABLE AuditLogs      MODIFY TenantId INT NOT NULL;
+ALTER TABLE Pages
+DROP PRIMARY KEY,
+        MODIFY PageId INT NOT NULL AUTO_INCREMENT,
+        ADD PRIMARY KEY (PageId);
 
-ALTER TABLE UserTenants    MODIFY UserId INT NOT NULL;
-ALTER TABLE UserTenants    MODIFY TenantId INT NOT NULL;
-
--- Re-add PKs
-ALTER TABLE Tenants        ADD PRIMARY KEY (TenantId);
-ALTER TABLE Stores         ADD PRIMARY KEY (StoreId);
-ALTER TABLE CmsUsers       ADD PRIMARY KEY (CmsUserId);
-ALTER TABLE Customers      ADD PRIMARY KEY (CustomerId);
-ALTER TABLE Products       ADD PRIMARY KEY (ProductId);
-ALTER TABLE ProductOptions ADD PRIMARY KEY (ProductOptionId);
-ALTER TABLE Orders         ADD PRIMARY KEY (OrderId);
-ALTER TABLE OrderItems     ADD PRIMARY KEY (OrderItemId);
-ALTER TABLE Payments       ADD PRIMARY KEY (PaymentId);
-ALTER TABLE Inventory      ADD PRIMARY KEY (InventoryId);
-ALTER TABLE Subscriptions  ADD PRIMARY KEY (SubscriptionId);
-ALTER TABLE Invoices       ADD PRIMARY KEY (InvoiceId);
-ALTER TABLE Pages          ADD PRIMARY KEY (PageId);
-ALTER TABLE UserTenants    ADD PRIMARY KEY (UserId, TenantId);
-
+    -- UserTenants is composite PK, so it must NOT use AUTO_INCREMENT here.
+    -- Keep it as (UserId, TenantId) composite key; no AUTO_INCREMENT columns.
+ALTER TABLE UserTenants
+DROP PRIMARY KEY,
+        ADD PRIMARY KEY (UserId, TenantId);
+     
 -- Re-add FKs (fresh names)
 ALTER TABLE Stores
     ADD CONSTRAINT fk_stores_tenant_int
