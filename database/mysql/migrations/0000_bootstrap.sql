@@ -23,7 +23,7 @@ SELECT
     CURRENT_USER(),
     'Schema migrations table'
 WHERE NOT EXISTS (
-    SELECT 1 FROM SchemaMigrations WHERE MigrationId = '0000_bootstrap'
+    SELECT 1 FROM schema_migrations WHERE migration_id = '0000_bootstrap'
 );
 
 COMMIT;
