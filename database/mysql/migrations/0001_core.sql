@@ -79,6 +79,6 @@ SELECT '0001_core',
        'Core tenancy & users'
 WHERE NOT EXISTS (SELECT 1
                   FROM schema_migrations
-                  WHERE MigrationId = '0001_core');
+                  WHERE migration_id = '0001_core');
 
 COMMIT;
