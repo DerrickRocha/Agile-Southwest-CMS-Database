@@ -74,6 +74,26 @@ DROP PROCEDURE IF EXISTS DropAllForeignKeys;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- ... existing code that modifies columns, re-adds PKs/FKs, records SchemaMigrations ...
+-- ------------------------------------------------------------
+-- Record migration (idempotent)
+-- ------------------------------------------------------------
+INSERT INTO SchemaMigrations (
+    MigrationId,
+    AppliedAt,
+    AppliedBy,
+    Description
+)
+SELECT
+    @migration_id,
+    CURRENT_TIMESTAMP(6),
+    CURRENT_USER(),
+    'Convert BINARY(16) PK/FK columns to INT AUTO_INCREMENT.'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM SchemaMigrations
+    WHERE MigrationId = @migration_id
+);
+
+COMMIT;
 
 COMMIT;
