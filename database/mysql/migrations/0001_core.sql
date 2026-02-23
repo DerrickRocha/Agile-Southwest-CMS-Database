@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS tenants
 
 CREATE TABLE IF NOT EXISTS user_tenants
 (
-    tenant_id Int PRIMARY KEY NOT NULL,
-    user_id   Int PRIMARY KEY NOT NULL,
+    tenant_id Int NOT NULL,
+    user_id   Int NOT NULL,
     PRIMARY KEY (tenant_id, user_id),
     Role      VARCHAR(50)     NOT NULL DEFAULT 'Member',
     CreatedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
