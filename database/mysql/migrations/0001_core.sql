@@ -56,10 +56,10 @@ CREATE TABLE IF NOT EXISTS user_tenants
 CREATE TABLE IF NOT EXISTS customers
 (
     id         Int PRIMARY KEY AUTO_INCREMENT,
-    user_id    VARCHAR(100),
-    email      VARCHAR(255) NOT NULL,
-    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    user_id    Int PRIMARY KEY NOT NULL,
+    email      VARCHAR(255)    NOT NULL,
+    created_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_customers_tenant_email (email),
     CONSTRAINT customer_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB
@@ -70,9 +70,9 @@ CREATE TABLE IF NOT EXISTS customers
 -- 4️⃣ Record migration (idempotent)
 -- ----------------------------------------
 INSERT INTO schema_migrations (migration_id,
-                              applied_at,
-                              applied_by,
-                              description)
+                               applied_at,
+                               applied_by,
+                               description)
 SELECT '0001_core',
        CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
