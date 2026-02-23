@@ -57,7 +57,7 @@ APPLIED=$(mysql \
   -p"$DB_PASSWORD" \
   -N -s \
   "$DB_NAME" \
-  -e "SELECT MigrationId FROM SchemaMigrations;")
+  -e "SELECT migration_id FROM schema_migrations;")
 
 for file in "$MIGRATIONS_DIR"/*.sql; do
   MIGRATION_ID="$(basename "$file" .sql)"
