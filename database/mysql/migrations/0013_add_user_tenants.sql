@@ -28,40 +28,44 @@ CREATE TABLE IF NOT EXISTS UserTenants
   DEFAULT CHARSET = utf8mb4;
 
 -- Index for fast tenant lookups
+-- ------------------------------------------------------------
+-- 1) Unique index: Tenants(Subdomain)
+-- ------------------------------------------------------------
+SET @sql := (
+    SELECT IF(
+        EXISTS (
+            SELECT 1
+            FROM INFORMATION_SCHEMA.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'UserTenants'
+              AND INDEX_NAME = 'INDEX_IX_UserTenants_TenentId'
+        ),
+        'SELECT 1;',
+        'CREATE UNIQUE INDEX INDEX_IX_UserTenants_TenentId ON UserTenants (TenantId);'
+    )
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-CREATE INDEX INDEX_IX_UserTenants_TenentId ON UserTenants (TenantId);
-
--- =====================================================
--- 2️⃣ Migrate Existing Relationships
--- =====================================================
-INSERT INTO UserTenants (UserId, TenantId, Role, CreatedAt)
-SELECT CmsUserId, TenantId, 'Member', CreatedAt
-FROM CmsUsers
-WHERE TenantId IS NOT NULL;
-
--- =====================================================
--- 3️⃣ Drop Foreign Key From CmsUsers
--- =====================================================
-
--- First find the actual FK name if unknown:
--- SELECT CONSTRAINT_NAME
--- FROM information_schema.KEY_COLUMN_USAGE
--- WHERE TABLE_NAME = 'CmsUsers'
---   AND COLUMN_NAME = 'TenantId'
---   AND REFERENCED_TABLE_NAME = 'Tenants';
-
--- Replace FK_CmsUsers_Tenant with your actual FK name
-ALTER TABLE CmsUsers
-    DROP FOREIGN KEY fk_cmsusers_tenant;
-
-ALTER TABLE CmsUsers
-    DROP FOREIGN KEY FK_CmsUsers_Tenants;
-
--- =====================================================
--- 4️⃣ Drop TenantId Column From CmsUsers
--- =====================================================
-
-ALTER TABLE CmsUsers
-    DROP COLUMN TenantId;
+         -- ------------------------------------------------------------
+-- 6) Record migration (idempotent)
+-- ------------------------------------------------------------
+INSERT INTO SchemaMigrations (
+    MigrationId,
+    AppliedAt,
+    AppliedBy,
+    Description
+)
+SELECT
+    '0013_add_user_tenants',
+    CURRENT_TIMESTAMP(6),
+    CURRENT_USER(),
+    ' Adds UserTenants table and migrates existing relationships'
+    WHERE NOT EXISTS (
+    SELECT 1
+    FROM SchemaMigrations
+    WHERE MigrationId = '0013_add_user_tenants'
+);
 
 COMMIT;
