@@ -4,18 +4,18 @@
 
 START TRANSACTION;
 
-CREATE TABLE IF NOT EXISTS SchemaMigrations (
-                                                MigrationId VARCHAR(150) PRIMARY KEY,
-                                                AppliedAt   DATETIME(6) NOT NULL,
-                                                AppliedBy   VARCHAR(128) NOT NULL,
-                                                Description VARCHAR(500)
+CREATE TABLE IF NOT EXISTS schema_migrations (
+                                                migration_id VARCHAR(150) PRIMARY KEY,
+                                                applied_at   DATETIME(6) NOT NULL,
+                                                applied_by   VARCHAR(128) NOT NULL,
+                                                description VARCHAR(500)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO SchemaMigrations (
-    MigrationId,
-    AppliedAt,
-    AppliedBy,
-    Description
+INSERT INTO schema_migrations (
+    migration_id,
+    applied_at,
+    applied_by,
+    description
 )
 SELECT
     '0000_bootstrap',

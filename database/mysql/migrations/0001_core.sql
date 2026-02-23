@@ -6,66 +6,79 @@
 START TRANSACTION;
 
 -- ----------------------------------------
--- 1️⃣ Tenants
+-- 2️CMS Users (admins/editors)
 -- ----------------------------------------
-CREATE TABLE IF NOT EXISTS Tenants (
-                                       TenantId BINARY(16) PRIMARY KEY,
-                                       Name VARCHAR(200) NOT NULL,
-                                       Subdomain VARCHAR(100) NOT NULL,
-                                       CustomDomain VARCHAR(255),
-                                       SubscriptionStatus VARCHAR(50) NOT NULL,
-                                       CreatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                       UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                       UNIQUE KEY uq_tenants_subdomain (Subdomain)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS cms_users
+(
+    id              int PRIMARY KEY AUTO_INCREMENT,
+    cognito_user_id VARCHAR(100) NOT NULL,
+    role            VARCHAR(50)  NOT NULL,
+    create_at       DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- ----------------------------------------
--- 2️⃣ CMS Users (admins/editors)
+-- 1️⃣ Tenants
 -- ----------------------------------------
-CREATE TABLE IF NOT EXISTS CmsUsers (
-                                        CmsUserId BINARY(16) PRIMARY KEY,
-                                        TenantId  BINARY(16) NOT NULL,
-                                        CognitoUserId VARCHAR(100) NOT NULL,
-                                        Role VARCHAR(50) NOT NULL,
-                                        CreatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                        UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                        CONSTRAINT fk_cmsusers_tenant
-                                            FOREIGN KEY (TenantId) REFERENCES Tenants(TenantId)
-                                                ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS tenants
+(
+    id                  Int PRIMARY KEY AUTO_INCREMENT,
+    name                VARCHAR(200) NOT NULL,
+    sub_domain          VARCHAR(100) NOT NULL,
+    custom_domain       VARCHAR(255),
+    subscription_status VARCHAR(50)  NOT NULL,
+    created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    UNIQUE KEY uq_tenants_subdomain (sub_domain)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+
+CREATE TABLE IF NOT EXISTS user_tenants
+(
+    tenant_id Int         NOT NULL,
+    user_id   Int         NOT NULL,
+    PRIMARY KEY (tenant_id, user_id),
+    Role      VARCHAR(50) NOT NULL DEFAULT 'Member',
+    CreatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    DeletedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    CONSTRAINT user_tenant_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE,
+    CONSTRAINT user_tenant_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
+
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
 
 -- ----------------------------------------
 -- 3️⃣ Customers (storefront users)
 -- ----------------------------------------
-CREATE TABLE IF NOT EXISTS Customers (
-                                         CustomerId BINARY(16) PRIMARY KEY,
-                                         TenantId   BINARY(16) NOT NULL,
-                                         CognitoUserId VARCHAR(100),
-                                         Email VARCHAR(255) NOT NULL,
-                                         CreatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                         UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-                                         CONSTRAINT fk_customers_tenant
-                                             FOREIGN KEY (TenantId) REFERENCES Tenants(TenantId)
-                                                 ON DELETE CASCADE,
-                                         UNIQUE KEY uq_customers_tenant_email (TenantId, Email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS customers
+(
+    id         BINARY(16) PRIMARY KEY AUTO_INCREMENT,
+    user_id    VARCHAR(100),
+    email      VARCHAR(255) NOT NULL,
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    UNIQUE KEY uq_customers_tenant_email (email),
+    CONSTRAINT customer_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
 
 -- ----------------------------------------
 -- 4️⃣ Record migration (idempotent)
 -- ----------------------------------------
-INSERT INTO SchemaMigrations (
-    MigrationId,
-    AppliedAt,
-    AppliedBy,
-    Description
-)
-SELECT
-    '0001_core',
-    CURRENT_TIMESTAMP(6),
-    CURRENT_USER(),
-    'Core tenancy & users'
-WHERE NOT EXISTS (
-    SELECT 1 FROM SchemaMigrations WHERE MigrationId = '0001_core'
-);
+INSERT INTO SchemaMigrations (migration_id,
+                              applied_at,
+                              applied_by,
+                              description)
+SELECT '0001_core',
+       CURRENT_TIMESTAMP(6),
+       CURRENT_USER(),
+       'Core tenancy & users'
+WHERE NOT EXISTS (SELECT 1
+                  FROM SchemaMigrations
+                  WHERE MigrationId = '0001_core');
 
 COMMIT;
