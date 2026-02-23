@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS cms_users
     cognito_user_id VARCHAR(100) NOT NULL,
     email           VARCHAR(255) NOT NULL,
     role            VARCHAR(50)  NOT NULL,
-    create_at       DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    status          VARCHAR(50)  NOT NULL,
+    created_at       DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_cms_users_email (email)
 ) ENGINE = InnoDB
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS tenants
     name                VARCHAR(200) NOT NULL,
     sub_domain          VARCHAR(100) NOT NULL,
     custom_domain       VARCHAR(255),
-    subscription_status VARCHAR(50)  NOT NULL,
+    status VARCHAR(50)  NOT NULL,
     created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_tenants_subdomain (sub_domain)
