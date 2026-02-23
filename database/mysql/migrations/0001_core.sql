@@ -12,9 +12,11 @@ CREATE TABLE IF NOT EXISTS cms_users
 (
     id              int PRIMARY KEY AUTO_INCREMENT,
     cognito_user_id VARCHAR(100) NOT NULL,
+    email           VARCHAR(255) NOT NULL,
     role            VARCHAR(50)  NOT NULL,
     create_at       DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+    updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    UNIQUE KEY uq_cms_users_email (email)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
