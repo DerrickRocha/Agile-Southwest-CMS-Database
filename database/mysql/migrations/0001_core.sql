@@ -42,13 +42,13 @@ CREATE TABLE IF NOT EXISTS tenants
 
 CREATE TABLE IF NOT EXISTS user_tenants
 (
-    tenant_id Int         NOT NULL,
-    user_id   Int         NOT NULL,
+    tenant_id Int PRIMARY KEY NOT NULL,
+    user_id   Int PRIMARY KEY NOT NULL,
     PRIMARY KEY (tenant_id, user_id),
-    Role      VARCHAR(50) NOT NULL DEFAULT 'Member',
-    CreatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    UpdatedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    DeletedAt DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    Role      VARCHAR(50)     NOT NULL DEFAULT 'Member',
+    CreatedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    UpdatedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    DeletedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     CONSTRAINT user_tenant_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE,
     CONSTRAINT user_tenant_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
 
