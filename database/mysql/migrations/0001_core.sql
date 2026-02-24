@@ -30,9 +30,6 @@ CREATE TABLE IF NOT EXISTS tenants
     name                VARCHAR(200) NOT NULL,
     sub_domain          VARCHAR(100) NOT NULL,
     custom_domain       VARCHAR(255),
-    plan_tier           VARCHAR(50)  NOT NULL,
-    subscription_status VARCHAR(50)  NOT NULL,
-    status              VARCHAR(50)  NOT NULL,
     created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_tenants_subdomain (sub_domain)
