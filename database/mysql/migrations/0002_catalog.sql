@@ -41,6 +41,19 @@ CREATE TABLE IF NOT EXISTS product_option_choices
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
+CREATE TABLE IF NOT EXISTS product_images
+(
+    id         INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT          NOT NULL,
+    url        VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    INDEX image_product_idx (product_id),
+    CONSTRAINT image_product_fk FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
 INSERT INTO schema_migrations (migration_id,
                                applied_at,
                                applied_by,
