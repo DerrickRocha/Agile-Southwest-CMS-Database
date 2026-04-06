@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS stores (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE
+    CONSTRAINT stores_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE RESTRICT,
+    UNIQUE KEY stores_tenant_subdomain_uk (tenant_id, sub_domain),
+    INDEX stores_tenant_id_idx (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS inventory (
@@ -17,12 +19,16 @@ CREATE TABLE IF NOT EXISTS inventory (
     tenant_id INT NOT NULL,
     store_id INT NOT NULL,
     product_id INT NOT NULL,
-    quantity INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    UNIQUE KEY inventory_unique_index (store_id, product_id)
+    CONSTRAINT inventory_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE RESTRICT,
+    CONSTRAINT inventory_store_id_fk FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE RESTRICT,
+    CONSTRAINT inventory_product_id_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
+    CONSTRAINT inventory_quantity_check CHECK (quantity >= 0),
+    UNIQUE KEY inventory_store_product_uk (store_id, product_id, deleted_at),
+    INDEX inventory_tenant_store_idx (tenant_id, store_id),
 )
 
 INSERT INTO schema_migrations (migration_id,
