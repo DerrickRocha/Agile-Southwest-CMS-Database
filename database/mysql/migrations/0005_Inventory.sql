@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS inventory (
     CONSTRAINT inventory_product_id_fk FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
     CONSTRAINT inventory_quantity_check CHECK (quantity >= 0),
     UNIQUE KEY inventory_store_product_uk (store_id, product_id, deleted_at),
-    INDEX inventory_tenant_store_idx (tenant_id, store_id),
-)
+    INDEX inventory_tenant_store_idx (tenant_id, store_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO schema_migrations (migration_id,
                                applied_at,
