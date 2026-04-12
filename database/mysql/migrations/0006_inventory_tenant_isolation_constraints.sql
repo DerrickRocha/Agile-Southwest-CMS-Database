@@ -4,9 +4,9 @@ START TRANSACTION;
 -- 1. Drop ALL foreign keys that reference products.id
 -- ========================================
 
-ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_product_id_fk;
-ALTER TABLE product_options DROP FOREIGN KEY IF EXISTS product_option_product_fk;
-ALTER TABLE product_images DROP FOREIGN KEY IF EXISTS image_product_fk;
+ALTER TABLE inventory DROP FOREIGN KEY inventory_product_id_fk;
+ALTER TABLE product_options DROP FOREIGN KEY product_option_product_fk;
+ALTER TABLE product_images DROP FOREIGN KEY image_product_fk;
 -- Note: product_option_choices doesn't directly reference products, so no need
 
 -- ========================================
