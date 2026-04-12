@@ -39,7 +39,7 @@ ALTER TABLE products
 
 -- Add tenant_id to product_options
 ALTER TABLE product_options
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
 DROP FOREIGN KEY IF EXISTS product_option_product_fk,
     MODIFY product_id INT NOT NULL;
 
