@@ -1,18 +1,21 @@
 START TRANSACTION;
 
 -- ========================================
--- 1. Handle Products Table
+-- 1. Fix PRODUCTS table
 -- ========================================
 
 -- Drop foreign keys that reference products
-ALTER TABLE inventory DROP FOREIGN KEY inventory_product_id_fk;
+ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_product_id_fk;
+
+-- Remove AUTO_INCREMENT temporarily
+ALTER TABLE products MODIFY id INT NOT NULL;
 
 -- Drop existing primary key and add composite PK
 ALTER TABLE products DROP PRIMARY KEY;
 ALTER TABLE products ADD PRIMARY KEY (id, tenant_id);
 
--- Add tenant_id to products if missing (safety check)
-ALTER TABLE products MODIFY COLUMN tenant_id INT NOT NULL;
+-- Restore AUTO_INCREMENT (id is first column in PK now)
+ALTER TABLE products MODIFY id INT NOT NULL AUTO_INCREMENT;
 
 -- Add indexes for products
 ALTER TABLE products
@@ -25,18 +28,21 @@ ALTER TABLE products
     ADD UNIQUE INDEX IF NOT EXISTS products_tenant_name_uk (tenant_id, name, deleted_at);
 
 -- ========================================
--- 2. Handle Stores Table
+-- 2. Fix STORES table
 -- ========================================
 
 -- Drop foreign keys that reference stores
 ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
 
+-- Remove AUTO_INCREMENT temporarily
+ALTER TABLE stores MODIFY id INT NOT NULL;
+
 -- Drop existing primary key and add composite PK
 ALTER TABLE stores DROP PRIMARY KEY;
 ALTER TABLE stores ADD PRIMARY KEY (id, tenant_id);
 
--- Ensure tenant_id is NOT NULL
-ALTER TABLE stores MODIFY COLUMN tenant_id INT NOT NULL;
+-- Restore AUTO_INCREMENT
+ALTER TABLE stores MODIFY id INT NOT NULL AUTO_INCREMENT;
 
 -- Add indexes for stores
 ALTER TABLE stores
@@ -49,22 +55,24 @@ ALTER TABLE stores
     ADD UNIQUE INDEX IF NOT EXISTS stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
 
 -- ========================================
--- 3. Handle Inventory Table
+-- 3. Handle INVENTORY table
 -- ========================================
 
--- Add tenant_id if missing (should already exist)
-ALTER TABLE inventory MODIFY COLUMN tenant_id INT NOT NULL;
+-- Ensure tenant_id is NOT NULL
+ALTER TABLE inventory MODIFY tenant_id INT NOT NULL;
 
--- Drop existing constraints and indexes (clean slate)
+-- Drop existing constraints
 ALTER TABLE inventory
 DROP FOREIGN KEY IF EXISTS inventory_tenant_id_fk,
     DROP FOREIGN KEY IF EXISTS inventory_product_id_fk,
-    DROP FOREIGN KEY IF EXISTS inventory_store_id_fk,
+    DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
+
+-- Drop existing indexes
+ALTER TABLE inventory
 DROP INDEX IF EXISTS inventory_store_product_uk,
 DROP INDEX IF EXISTS inventory_tenant_id_idx,
 DROP INDEX IF EXISTS inventory_tenant_store_idx,
-DROP INDEX IF EXISTS inventory_tenant_product_idx,
-DROP INDEX IF EXISTS inventory_tenant_quantity_idx;
+DROP INDEX IF EXISTS inventory_tenant_product_idx;
 
 -- Add composite foreign keys
 ALTER TABLE inventory
@@ -77,9 +85,9 @@ ALTER TABLE inventory
 
 -- Add unique constraint with tenant_id
 ALTER TABLE inventory
-    ADD UNIQUE KEY inventory_tenant_store_product_uk (tenant_id, store_id, product_id, deleted_at);
+    ADD UNIQUE INDEX inventory_tenant_store_product_uk (tenant_id, store_id, product_id, deleted_at);
 
--- Add tenant-scoped indexes (tenant_id should be first for RLS)
+-- Add tenant-scoped indexes
 ALTER TABLE inventory
     ADD INDEX inventory_tenant_id_idx (tenant_id),
     ADD INDEX inventory_tenant_store_idx (tenant_id, store_id),
@@ -93,15 +101,7 @@ ALTER TABLE inventory
     ADD CONSTRAINT inventory_quantity_check CHECK (quantity >= 0);
 
 -- ========================================
--- 4. Additional Constraints for Data Integrity
--- ========================================
-
--- Ensure products.base_price_cents is non-negative
-ALTER TABLE products
-    ADD CONSTRAINT products_base_price_check CHECK (base_price_cents >= 0);
-
--- ========================================
--- 5. Migration Record
+-- 4. Migration Record
 -- ========================================
 
 INSERT INTO schema_migrations (migration_id, applied_at, applied_by, description)
@@ -116,40 +116,3 @@ WHERE NOT EXISTS (
 );
 
 COMMIT;
-
--- ========================================
--- 6. Verification Queries (Run after commit)
--- ========================================
-
--- Verify primary keys
-SELECT
-    table_name,
-    constraint_name,
-    constraint_type
-FROM information_schema.table_constraints
-WHERE table_schema = DATABASE()
-  AND table_name IN ('products', 'stores', 'inventory')
-  AND constraint_type = 'PRIMARY KEY';
-
--- Verify foreign keys
-SELECT
-    constraint_name,
-    table_name,
-    column_name,
-    referenced_table_name,
-    referenced_column_name
-FROM information_schema.key_column_usage
-WHERE table_schema = DATABASE()
-  AND table_name = 'inventory'
-  AND referenced_table_name IS NOT NULL;
-
--- Verify indexes
-SELECT
-    table_name,
-    index_name,
-    column_name,
-    seq_in_index
-FROM information_schema.statistics
-WHERE table_schema = DATABASE()
-  AND table_name IN ('products', 'stores', 'inventory')
-ORDER BY table_name, index_name, seq_in_index;
