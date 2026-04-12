@@ -40,7 +40,7 @@ ALTER TABLE products
 -- Add tenant_id to product_options
 ALTER TABLE product_options
     ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
-DROP FOREIGN KEY IF EXISTS product_option_product_fk,
+DROP FOREIGN KEY product_option_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- Add tenant_id to product_option_choices (inherits from product_options)
@@ -50,7 +50,7 @@ ALTER TABLE product_option_choices
 -- Add tenant_id to product_images
 ALTER TABLE product_images
     ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
-DROP FOREIGN KEY IF EXISTS image_product_fk,
+DROP FOREIGN KEY image_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- ========================================
@@ -73,7 +73,7 @@ ALTER TABLE product_images
 
 -- Product option choices foreign key (still references product_options.id)
 ALTER TABLE product_option_choices
-DROP FOREIGN KEY IF EXISTS product_option_choice_option_fk,
+DROP FOREIGN KEY product_option_choice_option_fk,
     ADD CONSTRAINT product_option_choice_option_fk 
     FOREIGN KEY (option_id, tenant_id) 
     REFERENCES product_options(id, tenant_id) 
@@ -102,7 +102,7 @@ ALTER TABLE product_images
 -- Check if any tables reference stores.id
 -- (Add similar DROP FOREIGN KEY statements for any tables referencing stores)
 
-ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
+ALTER TABLE inventory DROP FOREIGN KEY  inventory_store_id_fk;
 
 -- Remove AUTO_INCREMENT temporarily
 ALTER TABLE stores MODIFY id INT NOT NULL;
@@ -133,16 +133,16 @@ ALTER TABLE inventory MODIFY tenant_id INT NOT NULL;
 
 -- Drop existing constraints
 ALTER TABLE inventory
-DROP FOREIGN KEY IF EXISTS inventory_tenant_id_fk,
-    DROP FOREIGN KEY IF EXISTS inventory_product_id_fk,
-    DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
+DROP FOREIGN KEY inventory_tenant_id_fk,
+    DROP FOREIGN KEY inventory_product_id_fk,
+    DROP FOREIGN KEY inventory_store_id_fk;
 
 -- Drop existing indexes
 ALTER TABLE inventory
-DROP INDEX IF EXISTS inventory_store_product_uk,
-DROP INDEX IF EXISTS inventory_tenant_id_idx,
-DROP INDEX IF EXISTS inventory_tenant_store_idx,
-DROP INDEX IF EXISTS inventory_tenant_product_idx;
+DROP INDEX inventory_store_product_uk,
+DROP INDEX inventory_tenant_id_idx,
+DROP INDEX inventory_tenant_store_idx,
+DROP INDEX inventory_tenant_product_idx;
 
 -- Add composite foreign keys
 ALTER TABLE inventory
