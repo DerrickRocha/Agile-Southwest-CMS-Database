@@ -1,11 +1,17 @@
 START TRANSACTION;
 
 -- ========================================
--- 1. Fix PRODUCTS table
+-- 1. Drop ALL foreign keys that reference products.id
 -- ========================================
 
--- Drop foreign keys that reference products
-ALTER TABLE inventory DROP FOREIGN KEY inventory_product_id_fk;
+ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_product_id_fk;
+ALTER TABLE product_options DROP FOREIGN KEY IF EXISTS product_option_product_fk;
+ALTER TABLE product_images DROP FOREIGN KEY IF EXISTS image_product_fk;
+-- Note: product_option_choices doesn't directly reference products, so no need
+
+-- ========================================
+-- 2. Fix PRODUCTS table
+-- ========================================
 
 -- Remove AUTO_INCREMENT temporarily
 ALTER TABLE products MODIFY id INT NOT NULL;
@@ -28,10 +34,74 @@ ALTER TABLE products
     ADD UNIQUE INDEX IF NOT EXISTS products_tenant_name_uk (tenant_id, name, deleted_at);
 
 -- ========================================
--- 2. Fix STORES table
+-- 3. Update child tables to include tenant_id (for consistency)
 -- ========================================
 
--- Drop foreign keys that reference stores
+-- Add tenant_id to product_options
+ALTER TABLE product_options
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+DROP FOREIGN KEY IF EXISTS product_option_product_fk,
+    MODIFY product_id INT NOT NULL;
+
+-- Add tenant_id to product_option_choices (inherits from product_options)
+ALTER TABLE product_option_choices
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER option_id;
+
+-- Add tenant_id to product_images
+ALTER TABLE product_images
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+DROP FOREIGN KEY IF EXISTS image_product_fk,
+    MODIFY product_id INT NOT NULL;
+
+-- ========================================
+-- 4. Rebuild foreign keys with tenant_id
+-- ========================================
+
+-- Product options foreign key
+ALTER TABLE product_options
+    ADD CONSTRAINT product_option_product_fk
+        FOREIGN KEY (product_id, tenant_id)
+            REFERENCES products(id, tenant_id)
+            ON DELETE CASCADE;
+
+-- Product images foreign key
+ALTER TABLE product_images
+    ADD CONSTRAINT image_product_fk
+        FOREIGN KEY (product_id, tenant_id)
+            REFERENCES products(id, tenant_id)
+            ON DELETE CASCADE;
+
+-- Product option choices foreign key (still references product_options.id)
+ALTER TABLE product_option_choices
+DROP FOREIGN KEY IF EXISTS product_option_choice_option_fk,
+    ADD CONSTRAINT product_option_choice_option_fk 
+    FOREIGN KEY (option_id, tenant_id) 
+    REFERENCES product_options(id, tenant_id) 
+    ON DELETE CASCADE;
+
+-- ========================================
+-- 5. Add indexes to child tables for tenant isolation
+-- ========================================
+
+ALTER TABLE product_options
+    ADD INDEX IF NOT EXISTS product_options_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_options_product_tenant_idx (product_id, tenant_id);
+
+ALTER TABLE product_option_choices
+    ADD INDEX IF NOT EXISTS product_option_choices_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_option_choices_option_tenant_idx (option_id, tenant_id);
+
+ALTER TABLE product_images
+    ADD INDEX IF NOT EXISTS product_images_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_images_product_tenant_idx (product_id, tenant_id);
+
+-- ========================================
+-- 6. Now handle STORES table (similar pattern)
+-- ========================================
+
+-- Check if any tables reference stores.id
+-- (Add similar DROP FOREIGN KEY statements for any tables referencing stores)
+
 ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
 
 -- Remove AUTO_INCREMENT temporarily
@@ -55,7 +125,7 @@ ALTER TABLE stores
     ADD UNIQUE INDEX IF NOT EXISTS stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
 
 -- ========================================
--- 3. Handle INVENTORY table
+-- 7. Handle INVENTORY table
 -- ========================================
 
 -- Ensure tenant_id is NOT NULL
@@ -101,14 +171,14 @@ ALTER TABLE inventory
     ADD CONSTRAINT inventory_quantity_check CHECK (quantity >= 0);
 
 -- ========================================
--- 4. Migration Record
+-- 8. Migration Record
 -- ========================================
 
 INSERT INTO schema_migrations (migration_id, applied_at, applied_by, description)
 SELECT '0006_inventory_tenant_isolation_constraints',
        CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
-       'Add tenant isolation constraints and indexes to products, stores, and inventory'
+       'Add tenant isolation constraints and indexes to products, stores, inventory, and related tables'
 FROM DUAL
 WHERE NOT EXISTS (
     SELECT 1 FROM schema_migrations
