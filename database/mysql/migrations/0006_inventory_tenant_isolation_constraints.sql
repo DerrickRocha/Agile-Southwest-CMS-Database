@@ -31,7 +31,7 @@ ALTER TABLE products
 
 -- Add unique constraint for product name per tenant
 ALTER TABLE products
-    ADD UNIQUE INDEX IF NOT EXISTS products_tenant_name_uk (tenant_id, name, deleted_at);
+    ADD UNIQUE INDEX products_tenant_name_uk (tenant_id, name, deleted_at);
 
 -- ========================================
 -- 3. Update child tables to include tenant_id (for consistency)
