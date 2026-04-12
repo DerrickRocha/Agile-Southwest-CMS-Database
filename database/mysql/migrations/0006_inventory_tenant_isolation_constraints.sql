@@ -71,7 +71,7 @@ ALTER TABLE product_images
 
 -- Product option choices foreign key (still references product_options.id)
 ALTER TABLE product_option_choices
-DROP FOREIGN KEY IF EXISTS product_option_choice_option_fk,
+DROP FOREIGN KEY product_option_choice_option_fk,
     ADD CONSTRAINT product_option_choice_option_fk 
     FOREIGN KEY (option_id, tenant_id) 
     REFERENCES product_options(id, tenant_id) 
