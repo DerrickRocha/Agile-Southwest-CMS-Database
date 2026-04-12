@@ -5,7 +5,7 @@ START TRANSACTION;
 -- ========================================
 
 -- Drop foreign keys that reference products
-ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_product_id_fk;
+ALTER TABLE inventory DROP FOREIGN KEY inventory_product_id_fk;
 
 -- Drop existing primary key and add composite PK
 ALTER TABLE products DROP PRIMARY KEY;
