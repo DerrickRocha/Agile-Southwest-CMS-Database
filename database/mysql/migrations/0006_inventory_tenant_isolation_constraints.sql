@@ -44,11 +44,11 @@ ALTER TABLE product_options
 
 -- Add tenant_id to product_option_choices (inherits from product_options)
 ALTER TABLE product_option_choices
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER option_id;
+    ADD COLUMN tenant_id INT NOT NULL AFTER option_id;
 
 -- Add tenant_id to product_images
 ALTER TABLE product_images
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
 DROP FOREIGN KEY IF EXISTS image_product_fk,
     MODIFY product_id INT NOT NULL;
 
