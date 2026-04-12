@@ -40,7 +40,6 @@ ALTER TABLE products
 -- Add tenant_id to product_options
 ALTER TABLE product_options
     ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
-DROP FOREIGN KEY product_option_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- Add tenant_id to product_option_choices (inherits from product_options)
