@@ -31,7 +31,7 @@ ALTER TABLE products
 
 -- Add unique constraint for product name per tenant
 ALTER TABLE products
-    ADD UNIQUE INDEX products_tenant_name_uk (tenant_id, name, deleted_at);
+    ADD UNIQUE INDEX IF NOT EXISTS products_tenant_name_uk (tenant_id, name, deleted_at);
 
 -- ========================================
 -- 3. Update child tables to include tenant_id (for consistency)
@@ -39,18 +39,18 @@ ALTER TABLE products
 
 -- Add tenant_id to product_options
 ALTER TABLE product_options
-    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
-DROP FOREIGN KEY product_option_product_fk,
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+DROP FOREIGN KEY IF EXISTS product_option_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- Add tenant_id to product_option_choices (inherits from product_options)
 ALTER TABLE product_option_choices
-    ADD COLUMN tenant_id INT NOT NULL AFTER option_id;
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER option_id;
 
 -- Add tenant_id to product_images
 ALTER TABLE product_images
-    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
-DROP FOREIGN KEY image_product_fk,
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+DROP FOREIGN KEY IF EXISTS image_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- ========================================
@@ -73,7 +73,7 @@ ALTER TABLE product_images
 
 -- Product option choices foreign key (still references product_options.id)
 ALTER TABLE product_option_choices
-DROP FOREIGN KEY product_option_choice_option_fk,
+DROP FOREIGN KEY IF EXISTS product_option_choice_option_fk,
     ADD CONSTRAINT product_option_choice_option_fk 
     FOREIGN KEY (option_id, tenant_id) 
     REFERENCES product_options(id, tenant_id) 
@@ -84,16 +84,16 @@ DROP FOREIGN KEY product_option_choice_option_fk,
 -- ========================================
 
 ALTER TABLE product_options
-    ADD INDEX product_options_tenant_idx (tenant_id),
-    ADD INDEX product_options_product_tenant_idx (product_id, tenant_id);
+    ADD INDEX IF NOT EXISTS product_options_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_options_product_tenant_idx (product_id, tenant_id);
 
 ALTER TABLE product_option_choices
-    ADD INDEX product_option_choices_tenant_idx (tenant_id),
-    ADD INDEX product_option_choices_option_tenant_idx (option_id, tenant_id);
+    ADD INDEX IF NOT EXISTS product_option_choices_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_option_choices_option_tenant_idx (option_id, tenant_id);
 
 ALTER TABLE product_images
-    ADD INDEX product_images_tenant_idx (tenant_id),
-    ADD INDEX product_images_product_tenant_idx (product_id, tenant_id);
+    ADD INDEX IF NOT EXISTS product_images_tenant_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS product_images_product_tenant_idx (product_id, tenant_id);
 
 -- ========================================
 -- 6. Now handle STORES table (similar pattern)
@@ -102,7 +102,7 @@ ALTER TABLE product_images
 -- Check if any tables reference stores.id
 -- (Add similar DROP FOREIGN KEY statements for any tables referencing stores)
 
-ALTER TABLE inventory DROP FOREIGN KEY  inventory_store_id_fk;
+ALTER TABLE inventory DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
 
 -- Remove AUTO_INCREMENT temporarily
 ALTER TABLE stores MODIFY id INT NOT NULL;
@@ -116,13 +116,13 @@ ALTER TABLE stores MODIFY id INT NOT NULL AUTO_INCREMENT;
 
 -- Add indexes for stores
 ALTER TABLE stores
-    ADD INDEX stores_tenant_id_idx (tenant_id),
-    ADD INDEX stores_tenant_subdomain_idx (tenant_id, sub_domain),
-    ADD INDEX stores_tenant_online_idx (tenant_id, is_online);
+    ADD INDEX IF NOT EXISTS stores_tenant_id_idx (tenant_id),
+    ADD INDEX IF NOT EXISTS stores_tenant_subdomain_idx (tenant_id, sub_domain),
+    ADD INDEX IF NOT EXISTS stores_tenant_online_idx (tenant_id, is_online);
 
 -- Add unique constraint for subdomain per tenant
 ALTER TABLE stores
-    ADD UNIQUE INDEX stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
+    ADD UNIQUE INDEX IF NOT EXISTS stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
 
 -- ========================================
 -- 7. Handle INVENTORY table
@@ -133,16 +133,16 @@ ALTER TABLE inventory MODIFY tenant_id INT NOT NULL;
 
 -- Drop existing constraints
 ALTER TABLE inventory
-DROP FOREIGN KEY inventory_tenant_id_fk,
-    DROP FOREIGN KEY inventory_product_id_fk,
-    DROP FOREIGN KEY inventory_store_id_fk;
+DROP FOREIGN KEY IF EXISTS inventory_tenant_id_fk,
+    DROP FOREIGN KEY IF EXISTS inventory_product_id_fk,
+    DROP FOREIGN KEY IF EXISTS inventory_store_id_fk;
 
 -- Drop existing indexes
 ALTER TABLE inventory
-DROP INDEX inventory_store_product_uk,
-DROP INDEX inventory_tenant_id_idx,
-DROP INDEX inventory_tenant_store_idx,
-DROP INDEX inventory_tenant_product_idx;
+DROP INDEX IF EXISTS inventory_store_product_uk,
+DROP INDEX IF EXISTS inventory_tenant_id_idx,
+DROP INDEX IF EXISTS inventory_tenant_store_idx,
+DROP INDEX IF EXISTS inventory_tenant_product_idx;
 
 -- Add composite foreign keys
 ALTER TABLE inventory
