@@ -48,7 +48,8 @@ ALTER TABLE product_option_choices
 
 -- Add tenant_id to product_images
 ALTER TABLE product_images
-    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
+    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+DROP FOREIGN KEY IF EXISTS image_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- ========================================
