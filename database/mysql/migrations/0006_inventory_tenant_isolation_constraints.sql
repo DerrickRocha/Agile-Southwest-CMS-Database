@@ -25,13 +25,13 @@ ALTER TABLE products MODIFY id INT NOT NULL AUTO_INCREMENT;
 
 -- Add indexes for products
 ALTER TABLE products
-    ADD INDEX IF NOT EXISTS products_tenant_id_idx (tenant_id),
-    ADD INDEX IF NOT EXISTS products_tenant_active_idx (tenant_id, is_active),
-    ADD INDEX IF NOT EXISTS products_tenant_created_idx (tenant_id, created_at);
+    ADD INDEX products_tenant_id_idx (tenant_id),
+    ADD INDEX products_tenant_active_idx (tenant_id, is_active),
+    ADD INDEX products_tenant_created_idx (tenant_id, created_at);
 
 -- Add unique constraint for product name per tenant
 ALTER TABLE products
-    ADD UNIQUE INDEX IF NOT EXISTS products_tenant_name_uk (tenant_id, name, deleted_at);
+    ADD UNIQUE INDEX products_tenant_name_uk (tenant_id, name, deleted_at);
 
 -- ========================================
 -- 3. Update child tables to include tenant_id (for consistency)
@@ -39,17 +39,17 @@ ALTER TABLE products
 
 -- Add tenant_id to product_options
 ALTER TABLE product_options
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
 DROP FOREIGN KEY IF EXISTS product_option_product_fk,
     MODIFY product_id INT NOT NULL;
 
 -- Add tenant_id to product_option_choices (inherits from product_options)
 ALTER TABLE product_option_choices
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER option_id;
+    ADD COLUMN tenant_id INT NOT NULL AFTER option_id;
 
 -- Add tenant_id to product_images
 ALTER TABLE product_images
-    ADD COLUMN IF NOT EXISTS tenant_id INT NOT NULL AFTER product_id,
+    ADD COLUMN tenant_id INT NOT NULL AFTER product_id,
 DROP FOREIGN KEY IF EXISTS image_product_fk,
     MODIFY product_id INT NOT NULL;
 
@@ -84,16 +84,16 @@ DROP FOREIGN KEY IF EXISTS product_option_choice_option_fk,
 -- ========================================
 
 ALTER TABLE product_options
-    ADD INDEX IF NOT EXISTS product_options_tenant_idx (tenant_id),
-    ADD INDEX IF NOT EXISTS product_options_product_tenant_idx (product_id, tenant_id);
+    ADD INDEX product_options_tenant_idx (tenant_id),
+    ADD INDEX product_options_product_tenant_idx (product_id, tenant_id);
 
 ALTER TABLE product_option_choices
-    ADD INDEX IF NOT EXISTS product_option_choices_tenant_idx (tenant_id),
-    ADD INDEX IF NOT EXISTS product_option_choices_option_tenant_idx (option_id, tenant_id);
+    ADD INDEX product_option_choices_tenant_idx (tenant_id),
+    ADD INDEX product_option_choices_option_tenant_idx (option_id, tenant_id);
 
 ALTER TABLE product_images
-    ADD INDEX IF NOT EXISTS product_images_tenant_idx (tenant_id),
-    ADD INDEX IF NOT EXISTS product_images_product_tenant_idx (product_id, tenant_id);
+    ADD INDEX product_images_tenant_idx (tenant_id),
+    ADD INDEX product_images_product_tenant_idx (product_id, tenant_id);
 
 -- ========================================
 -- 6. Now handle STORES table (similar pattern)
@@ -116,13 +116,13 @@ ALTER TABLE stores MODIFY id INT NOT NULL AUTO_INCREMENT;
 
 -- Add indexes for stores
 ALTER TABLE stores
-    ADD INDEX IF NOT EXISTS stores_tenant_id_idx (tenant_id),
-    ADD INDEX IF NOT EXISTS stores_tenant_subdomain_idx (tenant_id, sub_domain),
-    ADD INDEX IF NOT EXISTS stores_tenant_online_idx (tenant_id, is_online);
+    ADD INDEX stores_tenant_id_idx (tenant_id),
+    ADD INDEX stores_tenant_subdomain_idx (tenant_id, sub_domain),
+    ADD INDEX stores_tenant_online_idx (tenant_id, is_online);
 
 -- Add unique constraint for subdomain per tenant
 ALTER TABLE stores
-    ADD UNIQUE INDEX IF NOT EXISTS stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
+    ADD UNIQUE INDEX stores_tenant_subdomain_uk (tenant_id, sub_domain, deleted_at);
 
 -- ========================================
 -- 7. Handle INVENTORY table
