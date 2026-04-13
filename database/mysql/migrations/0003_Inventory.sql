@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS stores (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS inventory (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL AUTO_INCREMENT,
     tenant_id INT NOT NULL,
     store_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
     
+    PRIMARY KEY (id, tenant_id),
     CONSTRAINT inventory_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE RESTRICT,
     CONSTRAINT inventory_store_tenant_id_fk FOREIGN KEY (store_id, tenant_id) REFERENCES stores(id, tenant_id) ON DELETE RESTRICT,
     CONSTRAINT inventory_product_tenant_id_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products(id, tenant_id) ON DELETE RESTRICT,
@@ -35,7 +36,8 @@ CREATE TABLE IF NOT EXISTS inventory (
     INDEX inventory_tenant_id_idx (tenant_id),
     INDEX inventory_tenant_store_idx (tenant_id, store_id),
     INDEX inventory_tenant_product_idx (tenant_id, product_id),
-    INDEX inventory_tenant_quantity_idx (tenant_id, quantity)
+    INDEX inventory_tenant_quantity_idx (tenant_id, quantity),
+    INDEX inventory_tenant_deleted_idx (tenant_id, deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO schema_migrations (migration_id,
