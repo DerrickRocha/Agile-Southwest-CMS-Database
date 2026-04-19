@@ -15,8 +15,9 @@ CREATE TABLE IF NOT EXISTS cms_users
     email           VARCHAR(255) NOT NULL,
     role            VARCHAR(50)  NOT NULL,
     status          VARCHAR(50)  NOT NULL,
-    created_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at      DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at DATETIME(6) NULL,
     UNIQUE KEY uq_cms_users_email (email)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
@@ -30,8 +31,10 @@ CREATE TABLE IF NOT EXISTS tenants
     name                VARCHAR(200) NOT NULL,
     sub_domain          VARCHAR(100) NOT NULL,
     custom_domain       VARCHAR(255),
-    created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at DATETIME(6) NULL,
+    row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_tenants_subdomain (sub_domain)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
@@ -43,9 +46,10 @@ CREATE TABLE IF NOT EXISTS user_tenants
     user_id   Int NOT NULL,
     PRIMARY KEY (tenant_id, user_id),
     Role      VARCHAR(50)     NOT NULL DEFAULT 'Member',
-    CreatedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    UpdatedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    DeletedAt DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at DATETIME(6) NULL,
+    row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT user_tenant_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE,
     CONSTRAINT user_tenant_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
 
@@ -62,6 +66,8 @@ CREATE TABLE IF NOT EXISTS customers
     email      VARCHAR(255) NOT NULL,
     created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at DATETIME(6) NULL,
+    row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_customers_tenant_email (email),
     CONSTRAINT customer_user_fk FOREIGN KEY (user_id) REFERENCES cms_users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB
