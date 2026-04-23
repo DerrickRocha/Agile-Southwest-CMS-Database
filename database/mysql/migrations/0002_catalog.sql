@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS images(
                                      updated_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                      deleted_at       TIMESTAMP    NULL,
                                      CONSTRAINT image_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
-                                     UNIQUE KEY uk_tenant_image (tenant_id, id),
                                      INDEX idx_tenant (tenant_id),
-                                     INDEX idx_deleted (deleted_at)
+                                     INDEX idx_deleted (deleted_at),
+                                     INDEX idx_tenant_deleted (tenant_id, deleted_at)
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
