@@ -57,18 +57,20 @@ CREATE TABLE IF NOT EXISTS product_option_choices
 
 CREATE TABLE IF NOT EXISTS product_images
 (
-    id         INT AUTO_INCREMENT,
-    product_id INT          NOT NULL,
-    tenant_id  INT          NOT NULL,
-    url        VARCHAR(255) NOT NULL,
-    is_primary BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP    NULL,
-    PRIMARY KEY (id, tenant_id),
-    CONSTRAINT image_product_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products (id, tenant_id) ON DELETE CASCADE,
+    id         INT PRIMARY KEY AUTO_INCREMENT,
+    tenant_id  INT       NOT NULL,
+    product_id INT       NOT NULL,
+    image_id   INT       NOT NULL,
+    is_primary BOOLEAN   NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    UNIQUE KEY uk_product_image (tenant_id, product_id, image_id),
+
+    FOREIGN KEY (tenant_id, product_id) REFERENCES products (tenant_id, id),
+    FOREIGN KEY (tenant_id, image_id) REFERENCES images (tenant_id, id),
     INDEX image_product_idx (product_id, tenant_id),
-    INDEX image_product_tenant_idx(tenant_id),
+    INDEX image_product_tenant_idx (tenant_id),
     INDEX image_primary_idx (product_id, is_primary)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
