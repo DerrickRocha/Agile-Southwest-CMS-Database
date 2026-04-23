@@ -1,5 +1,23 @@
 START TRANSACTION;
 
+CREATE TABLE IF NOT EXISTS images(
+                                     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                                     tenant_id INT NOT NULL,
+                                     url VARCHAR(2048) NOT NULL,
+                                     original_filename VARCHAR(255),
+                                     file_size INT,
+                                     content_type VARCHAR(100),
+                                     created_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
+                                     updated_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                     deleted_at       TIMESTAMP    NULL,
+                                     CONSTRAINT image_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
+                                     UNIQUE KEY uk_tenant_image (tenant_id, id),
+                                     INDEX idx_tenant (tenant_id),
+                                     INDEX idx_deleted (deleted_at)
+
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
 CREATE TABLE IF NOT EXISTS products
 (
     id               Int          NOT NULL AUTO_INCREMENT,
@@ -62,16 +80,18 @@ CREATE TABLE IF NOT EXISTS product_images
     product_id INT       NOT NULL,
     image_id   INT       NOT NULL,
     is_primary BOOLEAN   NOT NULL DEFAULT FALSE,
+    position INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
     UNIQUE KEY uk_product_image (tenant_id, product_id, image_id),
-
+    UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
     FOREIGN KEY (tenant_id, product_id) REFERENCES products (tenant_id, id),
-    FOREIGN KEY (tenant_id, image_id) REFERENCES images (tenant_id, id),
+    FOREIGN KEY (image_id) REFERENCES images (id),
     INDEX image_product_idx (product_id, tenant_id),
     INDEX image_product_tenant_idx (tenant_id),
-    INDEX image_primary_idx (product_id, is_primary)
+    INDEX image_primary_idx (product_id, is_primary),
+    INDEX idx_deleted (deleted_at)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
