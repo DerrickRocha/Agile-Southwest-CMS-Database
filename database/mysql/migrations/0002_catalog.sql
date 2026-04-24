@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS images(
                                      tenant_id INT NOT NULL,
                                      url VARCHAR(2048) NOT NULL,
                                      original_filename VARCHAR(255),
-                                     file_size INT,
+                                     file_size BIGINT,
                                      content_type VARCHAR(100),
                                      created_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
                                      updated_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
