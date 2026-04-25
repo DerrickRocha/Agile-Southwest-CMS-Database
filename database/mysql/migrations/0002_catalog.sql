@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS product_images
     created_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    UNIQUE KEY uk_product_image (tenant_id, product_id, image_id),
+    UNIQUE KEY uk_active_product_image (tenant_id, product_id, image_id),
     UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
     FOREIGN KEY (tenant_id, product_id) REFERENCES products (tenant_id, id),
     FOREIGN KEY (image_id) REFERENCES images (id),
