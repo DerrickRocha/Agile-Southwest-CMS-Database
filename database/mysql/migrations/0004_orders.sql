@@ -269,7 +269,8 @@ CREATE TABLE IF NOT EXISTS payment_methods
     deleted_at        DATETIME(6)  NULL,
 
     PRIMARY KEY (id, tenant_id),
-    FOREIGN KEY (tenant_id, customer_id) REFERENCES customers (id, tenant_id) ON DELETE CASCADE,
+    CONSTRAINT payment_methods_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
+    CONSTRAINT payment_methods_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE SET NULL,
     INDEX idx_payment_methods_customer (customer_id),
     INDEX idx_payment_methods_processor_token (processor_token),
     INDEX idx_payment_methods_default (customer_id, is_default),
