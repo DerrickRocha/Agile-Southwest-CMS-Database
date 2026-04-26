@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS payment_methods
 
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT payment_methods_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
-    CONSTRAINT payment_methods_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE SET NULL,
+    CONSTRAINT payment_methods_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
     INDEX idx_payment_methods_customer (customer_id),
     INDEX idx_payment_methods_processor_token (processor_token),
     INDEX idx_payment_methods_default (customer_id, is_default),
