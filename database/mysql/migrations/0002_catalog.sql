@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS products
     description      TEXT,
     base_price_cents INT          NOT NULL,
     is_active        BOOLEAN      NOT NULL DEFAULT TRUE,
+    is_enhanced_payment_required BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at DATETIME(6) NULL,
