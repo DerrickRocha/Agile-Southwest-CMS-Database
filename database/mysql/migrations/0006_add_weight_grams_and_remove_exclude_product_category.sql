@@ -3,7 +3,7 @@ START TRANSACTION;
 ALTER TABLE order_items ADD COLUMN weight_grams INT NULL;
 ALTER TABLE shipping_restrictions MODIFY COLUMN type ENUM('ExcludeLocation', 'MaxWeightGrams', 'MaxQuantity', 'MinOrderValue', 'MaxOrderValue');
 ALTER TABLE shipping_rate_rules MODIFY COLUMN condition_type ENUM('Subtotal', 'Weight', 'Quantity', 'Distance', 'Price') NOT NULL;
-ALTER TABLE customers ADD COLUMN tenant_id INT NOT NULL;
+ALTER TABLE customers ADD COLUMN tenant_id INT NULL;
 ALTER TABLE customers ADD CONSTRAINT customer_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE;
 ALTER TABLE customers ADD INDEX idx_tenant_id (tenant_id);
 ALTER TABLE orders
