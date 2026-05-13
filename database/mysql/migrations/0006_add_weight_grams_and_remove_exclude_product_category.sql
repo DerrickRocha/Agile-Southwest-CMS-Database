@@ -6,7 +6,6 @@ ALTER TABLE shipping_rate_rules MODIFY COLUMN condition_type ENUM('Subtotal', 'W
 ALTER TABLE customers ADD COLUMN tenant_id INT NULL;
 ALTER TABLE customers ADD CONSTRAINT customer_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE;
 ALTER TABLE customers ADD INDEX idx_tenant_id (tenant_id);
-ALTER TABLE customers ADD COLUMN row_version TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6);
 ALTER TABLE orders
     DROP FOREIGN KEY orders_customer_fk; -- Drop if exists
 
