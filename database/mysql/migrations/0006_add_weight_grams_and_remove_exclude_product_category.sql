@@ -13,11 +13,6 @@ ALTER TABLE shipping_rate_rules
 -- 3. Add tenant_id to customers (temporarily nullable)
 ALTER TABLE customers ADD COLUMN tenant_id INT NULL;
 
--- 4. Update existing customers with tenant_id from users
-UPDATE customers c
-    JOIN cms_users u ON c.user_id = u.id
-SET c.tenant_id = u.tenant_id;
-
 -- 5. Make tenant_id NOT NULL after populating
 ALTER TABLE customers MODIFY COLUMN tenant_id INT NOT NULL;
 
@@ -39,9 +34,6 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS row_version TIMESTAMP NOT NULL DE
 -- 9. Drop existing foreign key from orders (if it exists)
 ALTER TABLE orders DROP FOREIGN KEY IF EXISTS orders_customer_fk;
 
--- 10. Update any orphaned customer_id references
-UPDATE orders SET customer_id = NULL WHERE customer_id IS NOT NULL
-                                       AND NOT EXISTS (SELECT 1 FROM customers WHERE id = customer_id);
 
 -- 11. Recreate the foreign key with composite reference
 ALTER TABLE orders
