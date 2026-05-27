@@ -6,7 +6,7 @@ START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS stores
 (
-    id          INT          NOT NULL AUTO_INCREMENT,
+    id          INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id   INT          NOT NULL,
     name        VARCHAR(200) NOT NULL,
     sub_domain  VARCHAR(255) NOT NULL,
@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS stores
     updated_at  DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at  DATETIME(6)  NULL,
     row_version TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
     UNIQUE KEY stores_tenant_subdomain_uk (tenant_id, sub_domain),
     CONSTRAINT stores_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     INDEX stores_tenant_id_idx (tenant_id)
@@ -24,7 +23,7 @@ CREATE TABLE IF NOT EXISTS stores
 
 CREATE TABLE IF NOT EXISTS inventory
 (
-    id          INT         NOT NULL AUTO_INCREMENT,
+    id          INT         PRIMARY KEY AUTO_INCREMENT,
     tenant_id   INT         NOT NULL,
     store_id    INT         NOT NULL,
     product_id  INT         NOT NULL,
@@ -34,7 +33,6 @@ CREATE TABLE IF NOT EXISTS inventory
     deleted_at  DATETIME(6) NULL,
     row_version TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT inventory_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE RESTRICT,
     CONSTRAINT inventory_store_tenant_id_fk FOREIGN KEY (store_id, tenant_id) REFERENCES stores (id, tenant_id) ON DELETE RESTRICT,
     CONSTRAINT inventory_product_tenant_id_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products (id, tenant_id) ON DELETE RESTRICT,

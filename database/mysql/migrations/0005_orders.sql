@@ -6,7 +6,7 @@ START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                        INT                               NOT NULL AUTO_INCREMENT,
+    id                        INT                               PRIMARY KEY AUTO_INCREMENT,
     tenant_id                 INT                               NOT NULL,
     shipping_zone_id          INT                               NULL,
     customer_id               INT                               NULL,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS orders
     refunded_amount_cents     INT                               NOT NULL DEFAULT 0,
     payment_service_fee_cents INT                               NOT NULL DEFAULT 0,
     -- Currency
-    currency                  ENUM ('USD', 'CAD', 'EUR', 'GBP', 'AUD', 'NZD'),
+    currency                  ENUM ('USD', 'CAD', 'EUR', 'GBP', 'AUD', 'NZD') NOT NULL DEFAULT 'USD',
 
     -- Shipping address
     shipping_address_line1    VARCHAR(255)                      NOT NULL,
@@ -103,7 +103,6 @@ CREATE TABLE IF NOT EXISTS orders
     -- Concurrency
     row_version               TIMESTAMP                         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT orders_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE SET NULL,
     CONSTRAINT chk_orders_amounts CHECK (
@@ -141,7 +140,7 @@ CREATE TABLE IF NOT EXISTS orders
 
 CREATE TABLE IF NOT EXISTS order_items
 (
-    id                INT          NOT NULL AUTO_INCREMENT,
+    id                INT          PRIMARY KEY AUTO_INCREMENT,
     tenant_id         INT          NOT NULL,
     order_id          INT          NOT NULL,
     product_id        INT          NOT NULL,
@@ -165,7 +164,6 @@ CREATE TABLE IF NOT EXISTS order_items
     deleted_at        DATETIME(6)  NULL,
     -- Concurrency
     row_version       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT order_items_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT order_items_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
     CONSTRAINT order_items_product_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products (id, tenant_id) ON DELETE RESTRICT,
@@ -184,7 +182,7 @@ CREATE TABLE IF NOT EXISTS order_items
 -- =========================
 CREATE TABLE IF NOT EXISTS order_status_history
 (
-    id              INT                                  NOT NULL AUTO_INCREMENT,
+    id              INT                                  PRIMARY KEY AUTO_INCREMENT,
     tenant_id       INT                                  NOT NULL,
     order_id        INT                                  NOT NULL,
     old_status      VARCHAR(50)                          NULL,
@@ -196,7 +194,6 @@ CREATE TABLE IF NOT EXISTS order_status_history
     updated_at      DATETIME(6)                          NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at      DATETIME(6)                          NULL,
     row_version     TIMESTAMP                            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT order_status_history_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
     CONSTRAINT order_status_history_user_fk FOREIGN KEY (changed_by) REFERENCES cms_users (id) ON DELETE SET NULL,
@@ -210,7 +207,7 @@ CREATE TABLE IF NOT EXISTS order_status_history
 
 CREATE TABLE IF NOT EXISTS payment_attempts
 (
-    id                       INT          NOT NULL AUTO_INCREMENT,
+    id                       INT          PRIMARY KEY AUTO_INCREMENT,
     tenant_id                INT          NOT NULL,
     order_id                 INT          NOT NULL,
     payment_processor        VARCHAR(50)  NOT NULL,
@@ -240,8 +237,6 @@ CREATE TABLE IF NOT EXISTS payment_attempts
     deleted_at               DATETIME(6)  NULL,
     -- Concurrency
     row_version              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (id, tenant_id),
     FOREIGN KEY (tenant_id, order_id) REFERENCES orders (tenant_id, id) ON DELETE CASCADE,
     INDEX idx_payment_attempts_order (order_id),
     INDEX idx_payment_attempts_intent (payment_intent_id),
@@ -252,7 +247,7 @@ CREATE TABLE IF NOT EXISTS payment_attempts
 
 CREATE TABLE IF NOT EXISTS payment_methods
 (
-    id                INT          NOT NULL AUTO_INCREMENT,
+    id                INT          PRIMARY KEY AUTO_INCREMENT,
     tenant_id         INT          NOT NULL,
     customer_id       INT          NOT NULL,
     payment_processor VARCHAR(50)  NOT NULL,
@@ -283,7 +278,6 @@ CREATE TABLE IF NOT EXISTS payment_methods
     updated_at        DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     deleted_at        DATETIME(6)  NULL,
     row_version   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT payment_methods_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT payment_methods_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
     INDEX idx_payment_methods_customer (customer_id),
@@ -295,7 +289,7 @@ CREATE TABLE IF NOT EXISTS payment_methods
 
 CREATE TABLE IF NOT EXISTS payment_webhook_events
 (
-    id                INT          NOT NULL AUTO_INCREMENT,
+    id                INT          PRIMARY KEY AUTO_INCREMENT,
     tenant_id         INT          NULL COMMENT 'May not know initially, can be populated after processing',
     payment_processor VARCHAR(50)  NOT NULL,
     event_id          VARCHAR(255) NOT NULL COMMENT 'Gateways unique event ID (prevents duplicates)',
@@ -318,7 +312,6 @@ CREATE TABLE IF NOT EXISTS payment_webhook_events
     deleted_at        DATETIME(6)  NULL,
     row_version   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
-    PRIMARY KEY (id),
     UNIQUE KEY uk_webhook_events (payment_processor, event_id),
     INDEX idx_webhook_events_status (status),
     INDEX idx_webhook_events_processor (payment_processor)
