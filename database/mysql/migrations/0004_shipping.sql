@@ -1,12 +1,21 @@
+-- ----------------------------------------
+-- 0004_shipping.sql
+-- Shipping
+-- ----------------------------------------
+
 START TRANSACTION;
 
 -- Define geographic boundaries
 CREATE TABLE IF NOT EXISTS shipping_zones
 (
     id             INT PRIMARY KEY AUTO_INCREMENT,
-    tenant_id      INT NOT NULL,
+    tenant_id      INT         NOT NULL,
     name           VARCHAR(100), -- e.g., "Local Delivery", "Domestic East"
-    is_local_fleet BOOLEAN DEFAULT FALSE,
+    is_local_fleet BOOLEAN              DEFAULT FALSE,
+    created_at     DATETIME(6)            DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at     DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at     DATETIME(6) NULL,
+    row_version    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT zone_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
 );
 
@@ -14,9 +23,13 @@ CREATE TABLE IF NOT EXISTS shipping_zones
 CREATE TABLE IF NOT EXISTS zone_postal_codes
 (
     id               INT PRIMARY KEY,
-    tenant_id        INT NOT NULL,
+    tenant_id        INT         NOT NULL,
     shipping_zone_id INT REFERENCES shipping_zones (id),
     postal_code      VARCHAR(20), -- e.g., "10001" or wildcards like "100*"
+    created_at       DATETIME(6)            DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at       DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at       DATETIME(6) NULL,
+    row_version      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT zone_postal_code_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT zone_postal_code_shipping_zone_fk FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE
 );
@@ -28,10 +41,13 @@ CREATE TABLE IF NOT EXISTS shipping_rates
     tenant_id        INT            NOT NULL,
     shipping_zone_id INT REFERENCES shipping_zones (id),
     rate_name        VARCHAR(100), -- e.g., "Heavy Tier", "Standard Flat"
-    min_weight       DECIMAL(10, 2) DEFAULT 0.00,
+    min_weight       DECIMAL(10, 2)          DEFAULT 0.00,
     max_weight       DECIMAL(10, 2),
     price            DECIMAL(10, 2) NOT NULL,
-
+    created_at       DATETIME(6)             DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at       DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at       DATETIME(6)    NULL,
+    row_version      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     CONSTRAINT shipping_rate_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT shipping_rate_shipping_zone_fk FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE
 );

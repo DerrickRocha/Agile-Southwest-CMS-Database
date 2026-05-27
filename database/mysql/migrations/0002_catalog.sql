@@ -1,3 +1,7 @@
+-- ----------------------------------------
+-- 0002_catalog.sql
+-- Products catalog
+-- ----------------------------------------
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS images
@@ -11,6 +15,7 @@ CREATE TABLE IF NOT EXISTS images
     created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at        TIMESTAMP     NULL,
+    row_version   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT image_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     INDEX idx_tenant (tenant_id),
     INDEX idx_deleted (deleted_at),
@@ -88,9 +93,10 @@ CREATE TABLE IF NOT EXISTS product_images
     image_id   INT       NOT NULL,
     is_primary BOOLEAN   NOT NULL DEFAULT FALSE,
     position   INT       NOT NULL DEFAULT 0,
-    created_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
+    created_at DATETIME(6)          DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME(6)          DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME(6) NULL,
+    row_version   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_active_product_image (tenant_id, product_id, image_id),
     UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
     FOREIGN KEY (tenant_id, product_id) REFERENCES products (tenant_id, id),

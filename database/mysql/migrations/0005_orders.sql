@@ -1,5 +1,5 @@
 -- ----------------------------------------
--- 0004_orders.sql
+-- 0005_orders.sql
 -- Orders and Purchases
 -- ----------------------------------------
 START TRANSACTION;
@@ -97,12 +97,11 @@ CREATE TABLE IF NOT EXISTS orders
     admin_notes               TEXT                              NULL,
 
     -- Timestamps
-    created_at                TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP,
-    updated_at                TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at                TIMESTAMP                         NULL,
-    deleted_by                INT                               NULL,
+    created_at                DATETIME(6)                                DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at                DATETIME(6)                                DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at                DATETIME(6)                       NULL,
     -- Concurrency
-    row_version               TIMESTAMP                         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    row_version               TIMESTAMP                         NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
 
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT orders_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
@@ -161,10 +160,11 @@ CREATE TABLE IF NOT EXISTS order_items
     image_url         VARCHAR(500) NULL,     -- Snapshot of primary image URL
 
     -- Timestamps
-    created_at        TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at        TIMESTAMP    NULL,
-
+    created_at        DATETIME(6)           DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at        DATETIME(6)           DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at        DATETIME(6)  NULL,
+    -- Concurrency
+    row_version       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT order_items_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT order_items_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
@@ -192,8 +192,10 @@ CREATE TABLE IF NOT EXISTS order_status_history
     reason          VARCHAR(255)                         NULL,
     changed_by      INT                                  NULL, -- User ID who made the change
     changed_by_type ENUM ('system', 'admin', 'customer') NOT NULL DEFAULT 'system',
-    created_at      TIMESTAMP                                     DEFAULT CURRENT_TIMESTAMP,
-
+    created_at      TIMESTAMP                                     DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at      DATETIME(6)                          NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    deleted_at      DATETIME(6)                          NULL,
+    row_version     TIMESTAMP                            NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT order_status_history_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
@@ -232,6 +234,12 @@ CREATE TABLE IF NOT EXISTS payment_attempts
     -- Audit
     ip_address               VARCHAR(45)  NULL,
     user_agent               TEXT         NULL,
+
+    created_at               DATETIME(6)           DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at               DATETIME(6)           DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    deleted_at               DATETIME(6)  NULL,
+    -- Concurrency
+    row_version              TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
 
     PRIMARY KEY (id, tenant_id),
     FOREIGN KEY (tenant_id, order_id) REFERENCES orders (tenant_id, id) ON DELETE CASCADE,

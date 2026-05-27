@@ -1,3 +1,7 @@
+-- ----------------------------------------
+-- 0003_inventory.sql
+-- Inventory
+-- ----------------------------------------
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS stores
