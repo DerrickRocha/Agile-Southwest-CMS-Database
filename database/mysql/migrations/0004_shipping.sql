@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS shipping_zones
     created_at     DATETIME(6)            DEFAULT CURRENT_TIMESTAMP(6),
     updated_at     DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at     DATETIME(6) NULL,
-    row_version    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    row_version   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT zone_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE
 );
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS zone_postal_codes
     created_at       DATETIME(6)            DEFAULT CURRENT_TIMESTAMP(6),
     updated_at       DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at       DATETIME(6) NULL,
-    row_version      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    row_version      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT zone_postal_code_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT zone_postal_code_shipping_zone_fk FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE
 );
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS shipping_rates
     created_at       DATETIME(6)             DEFAULT CURRENT_TIMESTAMP(6),
     updated_at       DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at       DATETIME(6)    NULL,
-    row_version      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    row_version      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT shipping_rate_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT shipping_rate_shipping_zone_fk FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE
 );
