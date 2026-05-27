@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS order_status_history
     reason          VARCHAR(255)                         NULL,
     changed_by      INT                                  NULL, -- User ID who made the change
     changed_by_type ENUM ('system', 'admin', 'customer') NOT NULL DEFAULT 'system',
-    created_at      TIMESTAMP                                     DEFAULT CURRENT_TIMESTAMP(6),
+    created_at      DATETIME(6)                                     DEFAULT CURRENT_TIMESTAMP(6),
     updated_at      DATETIME(6)                          NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at      DATETIME(6)                          NULL,
     row_version     TIMESTAMP                            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
