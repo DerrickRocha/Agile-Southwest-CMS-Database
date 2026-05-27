@@ -17,24 +17,24 @@ CREATE TABLE IF NOT EXISTS orders
     customer_phone            VARCHAR(50)                       NULL,
     -- Status tracking
     status                    ENUM (
-        'pending',                      -- Order created, payment not initiated
-        'awaiting_payment',             -- Payment initiated but not confirmed (ACH)
+        'pending',           -- Order created, payment not initiated
+        'awaiting_payment',  -- Payment initiated but not confirmed (ACH)
         'payment_processing',-- Gateway processing (between auth and capture)
-        'paid',                         -- Payment confirmed
-        'payment_failed',               -- Payment failed
-        'payment_expired',              -- Auth expired (ACH timeout)
+        'paid',              -- Payment confirmed
+        'payment_failed',    -- Payment failed
+        'payment_expired',   -- Auth expired (ACH timeout)
         'partially_refunded',-- Partial refund issued
-        'refunded',                     -- Fully refunded
-        'cancelled'                     -- Order cancelled before payment
+        'refunded',          -- Fully refunded
+        'cancelled'          -- Order cancelled before payment
         )                                                       NOT NULL DEFAULT 'pending',
 
     payment_status            ENUM (
-        'unpaid',                       -- No payment attempted
-        'authorized',                   -- Card authorized, not captured
-        'processing',                   -- ACH payment in progress (awaiting settlement)
-        'paid',                         -- Payment completed
-        'failed',                       -- Payment failed
-        'refunded',                     -- Fully refunded
+        'unpaid',            -- No payment attempted
+        'authorized',        -- Card authorized, not captured
+        'processing',        -- ACH payment in progress (awaiting settlement)
+        'paid',              -- Payment completed
+        'failed',            -- Payment failed
+        'refunded',          -- Fully refunded
         'partial_refunded'
         )                                                       NOT NULL DEFAULT 'unpaid',
     fulfillment_status        ENUM ('fulfilled', 'unfulfilled', 'partial'),
