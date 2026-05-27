@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS products
 (
     id               Int          NOT NULL AUTO_INCREMENT,
     tenant_id        Int          NOT NULL,
+    tax_category_id INT NULL,
     name             VARCHAR(255) NOT NULL,
     description      TEXT,
     base_price_cents INT          NOT NULL,
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS products
     row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT product_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
+    CONSTRAINT products_tax_category_fk FOREIGN KEY (tax_category_id) REFERENCES tax_categories(id),
     INDEX product_tenant_idx (tenant_id),
     INDEX product_tenant_active_idx (tenant_id, is_active),
     INDEX product_tenant_name_idx (tenant_id, name)

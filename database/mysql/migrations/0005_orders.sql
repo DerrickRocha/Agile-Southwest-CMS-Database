@@ -1,104 +1,108 @@
+-- ----------------------------------------
+-- 0004_orders.sql
+-- Orders and Purchases
+-- ----------------------------------------
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS orders
 (
-    id                        INT                                           NOT NULL AUTO_INCREMENT,
-    tenant_id                 INT                                           NOT NULL,
-    customer_id               INT                                           NULL,
-    order_number              VARCHAR(50)                                   NOT NULL,
-    customer_email            VARCHAR(255)                                  NOT NULL,
-    customer_first_name       VARCHAR(100)                                  NOT NULL,
-    customer_last_name        VARCHAR(100)                                  NOT NULL,
-    customer_phone            VARCHAR(50)                                   NULL,
+    id                        INT                               NOT NULL AUTO_INCREMENT,
+    tenant_id                 INT                               NOT NULL,
+    shipping_zone_id          INT                               NULL,
+    customer_id               INT                               NULL,
+    order_number              VARCHAR(50)                       NOT NULL,
+    customer_email            VARCHAR(255)                      NOT NULL,
+    customer_first_name       VARCHAR(100)                      NOT NULL,
+    customer_last_name        VARCHAR(100)                      NOT NULL,
+    customer_phone            VARCHAR(50)                       NULL,
     -- Status tracking
     status                    ENUM (
-        'pending',                                                                                          -- Order created, payment not initiated
-        'awaiting_payment',                                                                                 -- Payment initiated but not confirmed (ACH)
+        'pending',                      -- Order created, payment not initiated
+        'awaiting_payment',             -- Payment initiated but not confirmed (ACH)
         'payment_processing',-- Gateway processing (between auth and capture)
-        'paid',                                                                                             -- Payment confirmed
-        'payment_failed',                                                                                   -- Payment failed
-        'payment_expired',                                                                                  -- Auth expired (ACH timeout)
+        'paid',                         -- Payment confirmed
+        'payment_failed',               -- Payment failed
+        'payment_expired',              -- Auth expired (ACH timeout)
         'partially_refunded',-- Partial refund issued
-        'refunded',                                                                                         -- Fully refunded
-        'cancelled'                                                                                         -- Order cancelled before payment
-        )                                                                   NOT NULL DEFAULT 'pending',
+        'refunded',                     -- Fully refunded
+        'cancelled'                     -- Order cancelled before payment
+        )                                                       NOT NULL DEFAULT 'pending',
 
     payment_status            ENUM (
-        'unpaid',                                                                                           -- No payment attempted
-        'authorized',                                                                                       -- Card authorized, not captured
-        'processing',                                                                                       -- ACH payment in progress (awaiting settlement)
-        'paid',                                                                                             -- Payment completed
-        'failed',                                                                                           -- Payment failed
-        'refunded',                                                                                         -- Fully refunded
+        'unpaid',                       -- No payment attempted
+        'authorized',                   -- Card authorized, not captured
+        'processing',                   -- ACH payment in progress (awaiting settlement)
+        'paid',                         -- Payment completed
+        'failed',                       -- Payment failed
+        'refunded',                     -- Fully refunded
         'partial_refunded'
-        )                                                                   NOT NULL DEFAULT 'unpaid',
-    fulfillment_status        VARCHAR(50)                                   NOT NULL DEFAULT 'unfulfilled', -- unfulfilled, partial, fulfilled
+        )                                                       NOT NULL DEFAULT 'unpaid',
+    fulfillment_status        ENUM ('fulfilled', 'unfulfilled', 'partial'),
 
     -- Amounts (in cents)
-    subtotal_cents            INT                                           NOT NULL,
-    discount_cents            INT                                           NOT NULL DEFAULT 0,
-    coupon_code               VARCHAR(100)                                  NULL,
-    coupon_discount_cents     INT                                           NOT NULL DEFAULT 0,
-    tax_cents                 INT                                           NOT NULL DEFAULT 0,
-    shipping_cents            INT                                           NOT NULL DEFAULT 0,
-    total_cents               INT                                           NOT NULL,
-    refunded_amount_cents     INT                                           NOT NULL DEFAULT 0,
-    payment_service_fee_cents INT                                           NOT NULL DEFAULT 0,
+    subtotal_cents            INT                               NOT NULL,
+    discount_cents            INT                               NOT NULL DEFAULT 0,
+    coupon_code               VARCHAR(100)                      NULL,
+    coupon_discount_cents     INT                               NOT NULL DEFAULT 0,
+    tax_cents                 INT                               NOT NULL DEFAULT 0,
+    shipping_cents            INT                               NOT NULL DEFAULT 0,
+    total_cents               INT                               NOT NULL,
+    refunded_amount_cents     INT                               NOT NULL DEFAULT 0,
+    payment_service_fee_cents INT                               NOT NULL DEFAULT 0,
     -- Currency
-    currency                  VARCHAR(3)                                    NOT NULL DEFAULT 'USD',
+    currency                  ENUM ('USD', 'CAD', 'EUR', 'GBP', 'AUD', 'NZD'),
 
     -- Shipping address
-    shipping_address_line1    VARCHAR(255)                                  NOT NULL,
-    shipping_address_line2    VARCHAR(255)                                  NULL,
-    shipping_city             VARCHAR(100)                                  NOT NULL,
-    shipping_state            VARCHAR(100)                                  NULL,
-    shipping_postal_code      VARCHAR(20)                                   NOT NULL,
-    shipping_country          VARCHAR(100)                                  NOT NULL,
+    shipping_address_line1    VARCHAR(255)                      NOT NULL,
+    shipping_address_line2    VARCHAR(255)                      NULL,
+    shipping_city             VARCHAR(100)                      NOT NULL,
+    shipping_state            VARCHAR(100)                      NULL,
+    shipping_postal_code      VARCHAR(20)                       NOT NULL,
+    shipping_country          VARCHAR(100)                      NOT NULL,
 
     -- Billing address (can be same as shipping)
-    billing_address_line1     VARCHAR(255)                                  NOT NULL,
-    billing_address_line2     VARCHAR(255)                                  NULL,
-    billing_city              VARCHAR(100)                                  NOT NULL,
-    billing_state             VARCHAR(100)                                  NULL,
-    billing_postal_code       VARCHAR(20)                                   NOT NULL,
-    billing_country           VARCHAR(100)                                  NOT NULL,
+    billing_address_line1     VARCHAR(255)                      NOT NULL,
+    billing_address_line2     VARCHAR(255)                      NULL,
+    billing_city              VARCHAR(100)                      NOT NULL,
+    billing_state             VARCHAR(100)                      NULL,
+    billing_postal_code       VARCHAR(20)                       NOT NULL,
+    billing_country           VARCHAR(100)                      NOT NULL,
 
     -- Payment info
-    payment_processor         VARCHAR(50)                                   NULL COMMENT 'stripe, aeropay, paypal, etc.',
-    processor_transaction_id  VARCHAR(255)                                  NULL COMMENT 'Gateways internal transaction reference',
-    processor_response_code   VARCHAR(50)                                   NULL COMMENT 'Gateway response code for debugging',
-    payment_intent_id         VARCHAR(255)                                  NULL COMMENT 'Gateways unique transaction ID',
-    checkout_session_id       VARCHAR(255)                                  NULL,
-    payment_authorized_at     DATETIME(6)                                   NULL COMMENT 'When gateway authorized the payment',
-    payment_captured_at       DATETIME(6)                                   NULL COMMENT 'When funds were captured/settled',
-    paid_at                   DATETIME(6)                                   NULL COMMENT 'When payment was confirmed (authorized for cards, settled for ACH)',
-    payment_expires_at        DATETIME(6)                                   NULL COMMENT 'For ACH, when the auth expires',
-    payment_method_details    JSON                                          NULL COMMENT 'Processor-specific metadata (card brand, bank name, etc.)',
-    payment_settled_at        DATETIME(6)                                   NULL COMMENT 'When ACH funds actually settled',
-    payment_risk_score        INT                                           NULL COMMENT 'Gateways fraud score (0-100)',
-    payment_metadata          JSON                                          NULL COMMENT 'Additional processor data',
-    order_type                ENUM ('standard', 'subscription', 'preorder') NOT NULL DEFAULT 'standard',
+    payment_processor         ENUM ('stripe', 'aeropay'),
+    processor_transaction_id  VARCHAR(255)                      NULL COMMENT 'Gateways internal transaction reference',
+    processor_response_code   VARCHAR(50)                       NULL COMMENT 'Gateway response code for debugging',
+    payment_intent_id         VARCHAR(255)                      NULL COMMENT 'Gateways unique transaction ID',
+    checkout_session_id       VARCHAR(255)                      NULL,
+    payment_authorized_at     DATETIME(6)                       NULL COMMENT 'When gateway authorized the payment',
+    payment_captured_at       DATETIME(6)                       NULL COMMENT 'When funds were captured/settled',
+    paid_at                   DATETIME(6)                       NULL COMMENT 'When payment was confirmed (authorized for cards, settled for ACH)',
+    payment_expires_at        DATETIME(6)                       NULL COMMENT 'For ACH, when the auth expires',
+    payment_method_details    JSON                              NULL COMMENT 'Processor-specific metadata (card brand, bank name, etc.)',
+    payment_settled_at        DATETIME(6)                       NULL COMMENT 'When ACH funds actually settled',
+    payment_risk_score        INT                               NULL COMMENT 'Gateways fraud score (0-100)',
+    payment_metadata          JSON                              NULL COMMENT 'Additional processor data',
+    order_type                ENUM ('standard', 'subscription') NOT NULL DEFAULT 'standard',
 
     -- Audit
-    ip_address                VARCHAR(45)                                   NULL,
-    user_agent                TEXT                                          NULL,
-    
+    ip_address                VARCHAR(45)                       NULL,
+    user_agent                TEXT                              NULL,
+
     -- Shipping info
-    shipping_method           VARCHAR(100)                                  NULL,
-    tracking_number           VARCHAR(255)                                  NULL,
-    tracking_url              VARCHAR(500)                                  NULL,
+    tracking_number           VARCHAR(255)                      NULL,
+    tracking_url              VARCHAR(500)                      NULL,
 
     -- Notes
-    customer_notes            TEXT                                          NULL,
-    admin_notes               TEXT                                          NULL,
+    customer_notes            TEXT                              NULL,
+    admin_notes               TEXT                              NULL,
 
     -- Timestamps
-    created_at                TIMESTAMP                                              DEFAULT CURRENT_TIMESTAMP,
-    updated_at                TIMESTAMP                                              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at                TIMESTAMP                                     NULL,
-    deleted_by                INT                                           NULL,
+    created_at                TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP,
+    updated_at                TIMESTAMP                                  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at                TIMESTAMP                         NULL,
+    deleted_by                INT                               NULL,
     -- Concurrency
-    row_version               TIMESTAMP                                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    row_version               TIMESTAMP                         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id, tenant_id),
     CONSTRAINT orders_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
@@ -113,6 +117,8 @@ CREATE TABLE IF NOT EXISTS orders
     CONSTRAINT chk_orders_refund CHECK (
         refunded_amount_cents <= total_cents
         ),
+    CONSTRAINT orders_shipping_zone_fk
+        FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE SET NULL,
     -- Indexes
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_number (order_number),
@@ -129,7 +135,7 @@ CREATE TABLE IF NOT EXISTS orders
     INDEX idx_orders_payment_intent (payment_intent_id),
     INDEX idx_orders_payment_processor (payment_processor),
     INDEX idx_orders_payment_status (payment_processor, payment_status),
-    INDEX idx_orders_paid_at (paid_at),                                                                     -- ✅ Added
+    INDEX idx_orders_paid_at (paid_at),
     INDEX idx_orders_stale_pending (created_at),
     INDEX idx_customer_orders (customer_id, created_at, status)
 );
@@ -140,13 +146,14 @@ CREATE TABLE IF NOT EXISTS order_items
     tenant_id         INT          NOT NULL,
     order_id          INT          NOT NULL,
     product_id        INT          NOT NULL,
-    product_name      VARCHAR(255) NOT NULL, -- Snapshot of product name at time of order
+    tax_category_id   INT          NULL,
+    product_name      VARCHAR(255) NOT NULL,
     product_sku       VARCHAR(100) NULL,
     quantity          INT          NOT NULL,
     unit_price_cents  INT          NOT NULL, -- Price at time of order
     total_price_cents INT          NOT NULL, -- quantity * unit_price
     discount_cents    INT          NOT NULL DEFAULT 0,
-
+    weight_grams      INT          NULL,
     -- Product options snapshot
     option_details    JSON         NULL,     -- Store selected options as JSON
 
@@ -162,7 +169,7 @@ CREATE TABLE IF NOT EXISTS order_items
     CONSTRAINT order_items_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT order_items_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
     CONSTRAINT order_items_product_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products (id, tenant_id) ON DELETE RESTRICT,
-
+    CONSTRAINT order_items_tax_category_fk FOREIGN KEY (tax_category_id) REFERENCES tax_categories (id),
     -- Indexes
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_id (order_id),
@@ -305,15 +312,16 @@ CREATE TABLE IF NOT EXISTS payment_webhook_events
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
+
 INSERT INTO schema_migrations (migration_id,
                                applied_at,
                                applied_by,
                                description)
-SELECT '0004_orders',
+SELECT '0005_orders',
        CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Add Orders and Purchases'
 WHERE NOT EXISTS (SELECT 1
                   FROM schema_migrations
-                  WHERE migration_id = '0004_orders');
+                  WHERE migration_id = '0005_orders');
 COMMIT;

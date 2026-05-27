@@ -1,19 +1,19 @@
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS stores (
-    id INT NOT NULL AUTO_INCREMENT,
-    tenant_id INT NOT NULL,
-    name VARCHAR(200) NOT NULL,
-    sub_domain VARCHAR(255) NOT NULL,
-    is_online BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    deleted_at DATETIME(6) NULL,
-    row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
-    UNIQUE KEY stores_tenant_subdomain_uk (tenant_id, sub_domain),
-    CONSTRAINT stores_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-    INDEX stores_tenant_id_idx (tenant_id)
+                                      id INT NOT NULL AUTO_INCREMENT,
+                                      tenant_id INT NOT NULL,
+                                      name VARCHAR(200) NOT NULL,
+                                      sub_domain VARCHAR(255) NOT NULL,
+                                      is_online BOOLEAN NOT NULL DEFAULT TRUE,
+                                      created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+                                      updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+                                      deleted_at DATETIME(6) NULL,
+                                      row_version TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      PRIMARY KEY (id, tenant_id),
+                                      UNIQUE KEY stores_tenant_subdomain_uk (tenant_id, sub_domain),
+                                      CONSTRAINT stores_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+                                      INDEX stores_tenant_id_idx (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS inventory (
