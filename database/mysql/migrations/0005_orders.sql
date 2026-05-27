@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS order_status_history
     deleted_at      DATETIME(6)                          NULL,
     row_version     TIMESTAMP                            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT order_status_history_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
-    CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id, tenant_id) REFERENCES orders (id, tenant_id) ON DELETE CASCADE,
+    CONSTRAINT order_status_history_order_fk FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
     CONSTRAINT order_status_history_user_fk FOREIGN KEY (changed_by) REFERENCES cms_users (id) ON DELETE SET NULL,
 
     INDEX idx_tenant (tenant_id),
