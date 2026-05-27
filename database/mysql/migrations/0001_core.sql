@@ -97,11 +97,9 @@ CREATE TABLE IF NOT EXISTS customers
 -- 4️⃣ Record migration (idempotent)
 -- ----------------------------------------
 INSERT INTO schema_migrations (migration_id,
-                               applied_at,
                                applied_by,
                                description)
 SELECT '0001_core',
-       CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Core tenancy & users'
 WHERE NOT EXISTS (SELECT 1

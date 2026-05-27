@@ -109,11 +109,9 @@ CREATE TABLE IF NOT EXISTS product_images
   DEFAULT CHARSET = utf8mb4;
 
 INSERT INTO schema_migrations (migration_id,
-                               applied_at,
                                applied_by,
                                description)
 SELECT '0002_catalog',
-       CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Product catalog'
 WHERE NOT EXISTS (SELECT 1

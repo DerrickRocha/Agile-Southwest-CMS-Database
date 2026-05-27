@@ -51,11 +51,9 @@ CREATE TABLE IF NOT EXISTS inventory
   DEFAULT CHARSET = utf8mb4;
 
 INSERT INTO schema_migrations (migration_id,
-                               applied_at,
                                applied_by,
                                description)
 SELECT '0003_Inventory',
-       CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Add Stores, Inventory and InventoryItem tables'
 WHERE NOT EXISTS (SELECT 1

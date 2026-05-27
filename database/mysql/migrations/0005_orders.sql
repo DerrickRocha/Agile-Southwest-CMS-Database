@@ -322,11 +322,9 @@ CREATE TABLE IF NOT EXISTS payment_webhook_events
 
 
 INSERT INTO schema_migrations (migration_id,
-                               applied_at,
                                applied_by,
                                description)
 SELECT '0005_orders',
-       CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Add Orders and Purchases'
 WHERE NOT EXISTS (SELECT 1

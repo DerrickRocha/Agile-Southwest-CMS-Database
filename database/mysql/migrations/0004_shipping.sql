@@ -53,11 +53,9 @@ CREATE TABLE IF NOT EXISTS shipping_rates
 );
 
 INSERT INTO schema_migrations (migration_id,
-                               applied_at,
                                applied_by,
                                description)
 SELECT '0004_shipping',
-       CURRENT_TIMESTAMP(6),
        CURRENT_USER(),
        'Shipping'
 WHERE NOT EXISTS (SELECT 1
