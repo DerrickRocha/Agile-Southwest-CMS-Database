@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS images
 
 CREATE TABLE IF NOT EXISTS products
 (
-    id                           INT          PRIMARY KEY AUTO_INCREMENT,
+    id                           INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id                    INT          NOT NULL,
     tax_category_id              INT          NULL,
     name                         VARCHAR(255) NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS product_option_choices
     deleted_at             DATETIME(6)  NULL,
     row_version            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT product_option_choice_option_fk FOREIGN KEY (option_id) REFERENCES product_options (id) ON DELETE CASCADE,
-    CONSTRAINT product_option_choices_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT product_option_choices_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT chk_price_delta_range
         CHECK (price_delta_cents >= -1000000 AND price_delta_cents <= 1000000),
     INDEX product_option_choice_option_idx (option_id, tenant_id),
@@ -96,13 +96,13 @@ CREATE TABLE IF NOT EXISTS product_images
     image_id    INT         NOT NULL,
     is_primary  BOOLEAN     NOT NULL DEFAULT FALSE,
     position    INT         NOT NULL DEFAULT 0,
-    created_at  DATETIME(6)          DEFAULT CURRENT_TIMESTAMP(6),
-    updated_at  DATETIME(6)          DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at  DATETIME(6) NULL,
     row_version TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_product_image (product_id, image_id),
     UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
-    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (tenant_id) REFERENCES tenants (id),
     FOREIGN KEY (product_id) REFERENCES products (id),
     FOREIGN KEY (image_id) REFERENCES images (id),
     INDEX image_product_idx (product_id, tenant_id),
