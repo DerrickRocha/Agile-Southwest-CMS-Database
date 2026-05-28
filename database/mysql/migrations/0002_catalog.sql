@@ -43,7 +43,9 @@ CREATE TABLE IF NOT EXISTS products
     UNIQUE KEY uk_tenant_product (tenant_id, id),
     INDEX product_tenant_idx (tenant_id),
     INDEX product_tenant_active_idx (tenant_id, is_active),
-    INDEX product_tenant_name_idx (tenant_id, name)
+    INDEX product_tenant_name_idx (tenant_id, name),
+    INDEX idx_tenant_active_price (tenant_id, is_active, base_price_cents),
+    INDEX idx_tenant_created (tenant_id, created_at DESC)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -102,15 +104,14 @@ CREATE TABLE IF NOT EXISTS product_images
     row_version TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_product_image (product_id, image_id),
     UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
-    FOREIGN KEY (tenant_id) REFERENCES tenants (id),
-    FOREIGN KEY (product_id) REFERENCES products (id),
-    FOREIGN KEY (image_id) REFERENCES images (id),
+    CONSTRAINT FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (image_id) REFERENCES images (id) ON DELETE CASCADE,
+    CONSTRAINT chk_position_non_negative CHECK (position >= 0),
     INDEX image_product_idx (product_id, tenant_id),
-    INDEX image_product_tenant_idx (tenant_id),
     INDEX image_primary_idx (product_id, is_primary),
     INDEX idx_deleted (deleted_at),
-    INDEX idx_product_images_image(image_id),
-    INDEX idx_product_options_product(product_id)
+    INDEX idx_product_images_image(image_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
