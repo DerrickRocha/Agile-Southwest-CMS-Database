@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS images
 
 CREATE TABLE IF NOT EXISTS products
 (
-    id                           Int          NOT NULL AUTO_INCREMENT,
-    tenant_id                    Int          NOT NULL,
+    id                           INT          PRIMARY KEY AUTO_INCREMENT,
+    tenant_id                    INT          NOT NULL,
     tax_category_id              INT          NULL,
     name                         VARCHAR(255) NOT NULL,
     description                  TEXT,
@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS products
     updated_at                   DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at                   DATETIME(6)  NULL,
     row_version                  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
     CONSTRAINT product_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT products_tax_category_fk FOREIGN KEY (tax_category_id) REFERENCES tax_categories (id),
+    UNIQUE KEY uk_tenant_product (tenant_id, id),
     INDEX product_tenant_idx (tenant_id),
     INDEX product_tenant_active_idx (tenant_id, is_active),
     INDEX product_tenant_name_idx (tenant_id, name)
@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS products
 
 CREATE TABLE IF NOT EXISTS product_options
 (
-    id          INT AUTO_INCREMENT,
-    tenant_id   Int          NOT NULL,
+    id          INT PRIMARY KEY AUTO_INCREMENT,
+    tenant_id   INT          NOT NULL,
     product_id  INT          NOT NULL,
     name        VARCHAR(255) NOT NULL,
     is_required BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -58,8 +58,9 @@ CREATE TABLE IF NOT EXISTS product_options
     updated_at  DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at  DATETIME(6)  NULL,
     row_version TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
-    CONSTRAINT product_option_tenant_product_fk FOREIGN KEY (product_id, tenant_id) REFERENCES products (id, tenant_id) ON DELETE CASCADE,
+    CONSTRAINT product_option_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
+    CONSTRAINT product_option_product_fk FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+    UNIQUE KEY uk_tenant_option (tenant_id, id),
     INDEX product_option_product_idx (product_id, tenant_id),
     INDEX product_option_tenant_idx (tenant_id)
 ) ENGINE = InnoDB
@@ -67,7 +68,7 @@ CREATE TABLE IF NOT EXISTS product_options
 
 CREATE TABLE IF NOT EXISTS product_option_choices
 (
-    id                     INT AUTO_INCREMENT,
+    id                     INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id              INT          NOT NULL,
     option_id              INT          NOT NULL,
     name                   VARCHAR(255) NOT NULL,
@@ -78,8 +79,10 @@ CREATE TABLE IF NOT EXISTS product_option_choices
     updated_at             DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at             DATETIME(6)  NULL,
     row_version            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id, tenant_id),
-    CONSTRAINT product_option_choice_option_fk FOREIGN KEY (option_id, tenant_id) REFERENCES product_options (id, tenant_id) ON DELETE CASCADE,
+    CONSTRAINT product_option_choice_option_fk FOREIGN KEY (option_id) REFERENCES product_options (id) ON DELETE CASCADE,
+    CONSTRAINT product_option_choices_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT chk_price_delta_range
+        CHECK (price_delta_cents >= -1000000 AND price_delta_cents <= 1000000),
     INDEX product_option_choice_option_idx (option_id, tenant_id),
     INDEX product_option_choice_tenant_idx (tenant_id)
 ) ENGINE = InnoDB
@@ -97,9 +100,10 @@ CREATE TABLE IF NOT EXISTS product_images
     updated_at  DATETIME(6)          DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     deleted_at  DATETIME(6) NULL,
     row_version TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_active_product_image (tenant_id, product_id, image_id),
+    UNIQUE KEY uk_product_image (product_id, image_id),
     UNIQUE KEY uk_position_per_product (tenant_id, product_id, position),
-    FOREIGN KEY (tenant_id, product_id) REFERENCES products (tenant_id, id),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+    FOREIGN KEY (product_id) REFERENCES products (id),
     FOREIGN KEY (image_id) REFERENCES images (id),
     INDEX image_product_idx (product_id, tenant_id),
     INDEX image_product_tenant_idx (tenant_id),

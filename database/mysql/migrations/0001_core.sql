@@ -10,7 +10,7 @@ START TRANSACTION;
 -- ----------------------------------------
 CREATE TABLE IF NOT EXISTS cms_users
 (
-    id              int PRIMARY KEY AUTO_INCREMENT,
+    id              INT PRIMARY KEY AUTO_INCREMENT,
     cognito_user_id VARCHAR(100) NOT NULL,
     email           VARCHAR(255) NOT NULL,
     role            VARCHAR(50)  NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS cms_users
 -- ----------------------------------------
 CREATE TABLE IF NOT EXISTS tenants
 (
-    id            Int PRIMARY KEY AUTO_INCREMENT,
+    id            INT PRIMARY KEY AUTO_INCREMENT,
     name          VARCHAR(200) NOT NULL,
     sub_domain    VARCHAR(100) NOT NULL,
     custom_domain VARCHAR(255),
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS tenants
 
 CREATE TABLE IF NOT EXISTS user_tenants
 (
-    tenant_id   Int         NOT NULL,
-    user_id     Int         NOT NULL,
+    tenant_id   INT         NOT NULL,
+    user_id     INT         NOT NULL,
     PRIMARY KEY (tenant_id, user_id),
     Role        VARCHAR(50) NOT NULL DEFAULT 'Member',
     created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS tax_categories
     id         INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id  INT          NOT NULL,
     name       VARCHAR(255) NOT NULL,
-    tax_rate   DECIMAL      NOT NULL,
+    tax_rate   DECIMAL(10,4)      NOT NULL,
     created_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6)     NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     deleted_at DATETIME(6)     NULL,
@@ -77,9 +77,9 @@ CREATE TABLE IF NOT EXISTS tax_categories
 -- ----------------------------------------
 CREATE TABLE IF NOT EXISTS customers
 (
-    id          Int PRIMARY KEY AUTO_INCREMENT,
+    id          INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id   INT          NULL,
-    user_id     Int          NOT NULL,
+    user_id     INT          NOT NULL,
     email       VARCHAR(255) NOT NULL,
     created_at  DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at  DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),

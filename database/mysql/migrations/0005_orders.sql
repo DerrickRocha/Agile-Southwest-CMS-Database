@@ -117,6 +117,8 @@ CREATE TABLE IF NOT EXISTS orders
         ),
     CONSTRAINT orders_shipping_zone_fk
         FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE SET NULL,
+
+    UNIQUE KEY uk_tenant_order (tenant_id, id),
     -- Indexes
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_number (order_number),
