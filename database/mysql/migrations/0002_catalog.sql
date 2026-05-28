@@ -108,7 +108,9 @@ CREATE TABLE IF NOT EXISTS product_images
     INDEX image_product_idx (product_id, tenant_id),
     INDEX image_product_tenant_idx (tenant_id),
     INDEX image_primary_idx (product_id, is_primary),
-    INDEX idx_deleted (deleted_at)
+    INDEX idx_deleted (deleted_at),
+    INDEX idx_product_images_image(image_id),
+    INDEX idx_product_options_product(product_id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
