@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS orders
         refunded_amount_cents <= total_cents
         ),
     CONSTRAINT orders_shipping_zone_fk
-        FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE SET NULL,
+        FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE,
 
     UNIQUE KEY uk_tenant_order (tenant_id, id),
     -- Indexes
