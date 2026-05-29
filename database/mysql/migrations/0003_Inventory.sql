@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS inventory
 
     CONSTRAINT inventory_tenant_id_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE RESTRICT,
     CONSTRAINT inventory_store_fk FOREIGN KEY (store_id) REFERENCES stores (id) ON DELETE RESTRICT,
-    CONSTRAINT inventory_product_tenant_id_fk FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE RESTRICT,
+    CONSTRAINT inventory_product_tenant_id_fk FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
     CONSTRAINT inventory_quantity_check CHECK (quantity >= 0),
 
     UNIQUE KEY inventory_tenant_store_product_uk (tenant_id, store_id, product_id),
