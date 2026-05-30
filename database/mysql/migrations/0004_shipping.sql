@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS shipping_rates
     rate_name        VARCHAR(100), -- e.g., "Heavy Tier", "Standard Flat"
     min_weight       DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     max_weight       DECIMAL(10, 2) NULL COMMENT 'NULL means no upper bound',
-    price            DECIMAL(10, 2) NOT NULL,
+    priceCents            INT NOT NULL,
     created_at       DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at       DATETIME(6)    NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     deleted_at       DATETIME(6)    NULL,

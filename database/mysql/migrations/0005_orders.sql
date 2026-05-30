@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS orders
     shipping_zone_id          INT                                             NOT NULL,
     customer_id               INT                                             NULL,
     customer_email            VARCHAR(255)                                    NOT NULL,
+    customer_first_name VARCHAR(255) NOT NULL,
+    customer_last_name VARCHAR(255) NOT NULL,
+    customer_phone VARCHAR(50) NOT NULL,
     -- Status tracking
     status                    ENUM (
         'pending',
