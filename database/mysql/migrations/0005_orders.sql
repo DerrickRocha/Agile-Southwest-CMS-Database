@@ -7,14 +7,14 @@ START TRANSACTION;
 CREATE TABLE IF NOT EXISTS orders
 (
     id                        INT PRIMARY KEY AUTO_INCREMENT,
-    order_number              VARCHAR(255)                                    NOT NULL,
     tenant_id                 INT                                             NOT NULL,
-    shipping_zone_id          INT                                             NOT NULL,
+    shipping_rate_id          INT                                             NOT NULL,
+    order_number              VARCHAR(255)                                    NOT NULL,
     customer_id               INT                                             NULL,
     customer_email            VARCHAR(255)                                    NOT NULL,
-    customer_first_name VARCHAR(255) NOT NULL,
-    customer_last_name VARCHAR(255) NOT NULL,
-    customer_phone VARCHAR(50) NOT NULL,
+    customer_first_name VARCHAR(100) NOT NULL,
+    customer_last_name VARCHAR(100) NOT NULL,
+    customer_phone VARCHAR(50) NULL,
     -- Status tracking
     status                    ENUM (
         'pending',
@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS orders
     total_cents               INT                                             NOT NULL,
     refunded_amount_cents     INT                                             NOT NULL DEFAULT 0,
     payment_service_fee_cents INT                                             NOT NULL DEFAULT 0,
+    currency VARCHAR(20) NOT NULL,
 
     -- Shipping address
     shipping_address_line1    VARCHAR(255)                                    NOT NULL,
@@ -90,14 +91,15 @@ CREATE TABLE IF NOT EXISTS orders
     CONSTRAINT chk_orders_refund CHECK (
         refunded_amount_cents <= total_cents
         ),
-    CONSTRAINT orders_shipping_zone_fk
-        FOREIGN KEY (shipping_zone_id) REFERENCES shipping_zones (id) ON DELETE CASCADE,
+    CONSTRAINT orders_shipping_rate_fk
+        FOREIGN KEY (shipping_rate_id) REFERENCES shipping_rates (id) ON DELETE CASCADE,
 
     UNIQUE KEY uk_tenant_order (tenant_id, id),
     -- Indexes
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_number (order_number),
     INDEX idx_customer_id (customer_id),
+    INDEX idx_shipping_rate_id (shipping_rate_id),
     INDEX idx_customer_email (customer_email),
     INDEX idx_status (status),
     INDEX idx_payment_status (payment_status),
@@ -157,6 +159,7 @@ CREATE TABLE IF NOT EXISTS payment_transactions
     order_id          INT          NOT NULL,
     amount_cents       INT          NOT NULL,
     transaction_type   ENUM('authorize', 'capture', 'sale', 'refund', 'void') NOT NULL DEFAULT 'authorize',
+    currency ENUM('usd') NOT NULL DEFAULT 'usd',
     gateway_name             ENUM('stripe', 'aeropay')  NOT NULL DEFAULT 'stripe',
     gateway_transaction_id   VARCHAR(255) NULL COMMENT 'Actual id from gateway',
     gateway_fee_cents        INT          NULL COMMENT 'Gateway fee for this transaction',
@@ -168,8 +171,8 @@ CREATE TABLE IF NOT EXISTS payment_transactions
     updated_at        DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     deleted_at        DATETIME(6)  NULL,
     row_version       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT payment_transactions_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-    CONSTRAINT payment_transactions_order_fk FOREIGN KEY (order_id) REFERENCES orders(id),
+    CONSTRAINT payment_transactions_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+    CONSTRAINT payment_transactions_order_fk FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_id (order_id),
     INDEX idx_status (status),
