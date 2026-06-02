@@ -81,25 +81,23 @@ CREATE TABLE IF NOT EXISTS orders
 
     CONSTRAINT orders_tenant_fk FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
     CONSTRAINT orders_customer_fk FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE SET NULL,
+    CONSTRAINT orders_shipping_rate_fk FOREIGN KEY (shipping_rate_id) REFERENCES shipping_rates (id) ON DELETE RESTRICT,
     CONSTRAINT chk_orders_amounts CHECK (
         subtotal_cents >= 0
             AND discount_cents >= 0
             AND tax_cents >= 0
             AND shipping_cents >= 0
-            AND total_cents >= 0
+            AND total_cents >= 0    
         ),
     CONSTRAINT chk_orders_refund CHECK (
         refunded_amount_cents <= total_cents
         ),
-    CONSTRAINT orders_shipping_rate_fk
-        FOREIGN KEY (shipping_rate_id) REFERENCES shipping_rates (id) ON DELETE CASCADE,
-
+   
     UNIQUE KEY uk_tenant_order (tenant_id, id),
     -- Indexes
     INDEX idx_tenant (tenant_id),
     INDEX idx_order_number (order_number),
     INDEX idx_customer_id (customer_id),
-    INDEX idx_shipping_rate_id (shipping_rate_id),
     INDEX idx_customer_email (customer_email),
     INDEX idx_status (status),
     INDEX idx_payment_status (payment_status),
